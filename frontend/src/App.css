@@ -1,0 +1,30 @@
+#formEditor {
+  display: inline-block;
+  position: relative;
+  top: 20px;
+  left: 2%;
+  width: 56%;
+}
+
+.titulos {
+  font-size: 28px;
+  font-family: "Arial";
+  color:whitesmoke;
+}
+
+#formConsola {
+  display: inline-block;
+  position: relative;
+  top: 20px;
+  left: 4%;
+  width: 38%;
+}
+
+#consola {
+  height: 73vh;
+  background-color: #1E1E1E;
+  color:whitesmoke;
+  font-family: Consolas; 
+  font-size: 14px;
+  border: 0;
+}
