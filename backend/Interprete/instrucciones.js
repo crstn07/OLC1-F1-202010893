@@ -49,7 +49,6 @@ const TIPO_INSTRUCCION = {
 	EJECUTAR_METODO:  'INSTR_EJECUTAR_METODO'
 }
 
-// Constantes para los tipos de OPCION_SWITCH validas en la gramática
 const TIPO_OPCION_SWITCH = {
 	CASE: 'CASE',
 	DEFAULT: 'DEFAULT'
