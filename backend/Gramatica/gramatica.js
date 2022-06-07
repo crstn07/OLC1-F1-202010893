@@ -95,10 +95,10 @@ case 3:
  this.$ = [$$[$0]]; 
 break;
 case 4:
- this.$ = instrucciones.newPrint($$[$0-2]); 
+ this.$ = instrucciones.nuevoPrint($$[$0-2]); 
 break;
 case 5:
- this.$ = instrucciones.newPrintln($$[$0-2]); 
+ this.$ = instrucciones.nuevoPrintln($$[$0-2]); 
 break;
 case 8:
  this.$ = instrucciones.nuevoSwitch($$[$0-4],$$[$0-1]);
@@ -161,7 +161,7 @@ case 27:
  this.$ = instrucciones.nuevoIf($$[$0-1], $$[$0]); 
 break;
 case 28:
- this.$ = instrucciones.nuevoElse($$[$0-3], $$[$0-2], $$[$0]); 
+ this.$ = instrucciones.nuevoElseIf($$[$0-3], $$[$0-2], $$[$0]); 
 break;
 case 29:
  this.$ = instrucciones.nuevoIfElse($$[$0-3], $$[$0-2], $$[$0]); 

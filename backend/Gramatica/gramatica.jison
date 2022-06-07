@@ -113,8 +113,8 @@ instrucciones
 
 instruccion
 	//PRINT
-	: PRINT PAR_ABRE expresion PAR_CIERRA PTCOMA	{ $$ = instrucciones.newPrint($3); }
-	| PRINTLN PAR_ABRE expresion PAR_CIERRA PTCOMA	{ $$ = instrucciones.newPrintln($3); }
+	: PRINT PAR_ABRE expresion PAR_CIERRA PTCOMA	{ $$ = instrucciones.nuevoPrint($3); }
+	| PRINTLN PAR_ABRE expresion PAR_CIERRA PTCOMA	{ $$ = instrucciones.nuevoPrintln($3); }
 	| declaracion_asignacion
 	| if				
 	| SWITCH PAR_ABRE expresion PAR_CIERRA LLAVE_ABRE casos LLAVE_CIERRA	{ $$ = instrucciones.nuevoSwitch($3,$6);}
@@ -150,7 +150,7 @@ tipo
 ;
 if
 	: IF expresion statement                { $$ = instrucciones.nuevoIf($2, $3); }
-	| IF expresion statement ELSE if        { $$ = instrucciones.nuevoElse($2, $3, $5); }
+	| IF expresion statement ELSE if        { $$ = instrucciones.nuevoElseIf($2, $3, $5); }
 	| IF expresion statement ELSE statement { $$ = instrucciones.nuevoIfElse($2, $3, $5); }
     | IF expresion instruccion PTCOMA       { $$ = instrucciones.nuevoIf($2, $3); }
 	| IF expresion instruccion PTCOMA ELSE if      { $$ = instrucciones.nuevoElse($2, $3, $6); }

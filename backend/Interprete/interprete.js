@@ -25,10 +25,10 @@ function analizar(entrada) {
     }
 
     // Creación de una tabla de simbolos GLOBAL para iniciar con el interprete
-    const tsGlobal = new TS([], []);
-
+    //const tsGlobal = new TS([], []);
+    const tsGlobal = [];
     // Procesa las instrucciones reconocidas en el AST
-    console.log(procesarBloque(ast, tsGlobal).ts)
+    procesarBloque(ast, tsGlobal)
     return salida
 }
 
@@ -82,6 +82,243 @@ function procesarBloque(instrucciones, tablaDeSimbolos) {
         }
     });
     return { instrucciones: instrucciones, ts: tablaDeSimbolos, salida: salida }
+}
+
+function procesarExpresion(expresion, tablaDeSimbolos) {
+    if (expresion.tipo === TIPO_OPERACION.NEGATIVO) {
+        const valor = procesarExpresion(expresion.operandoIzq, tablaDeSimbolos);
+        if (valor.tipo === TIPO_DATO.ENTERO || valor.tipo === TIPO_DATO.DECIMAL) {
+            const res = valor.valor * -1;
+            return { valor: res, tipo: valor.tipo };
+        } else {
+            return { valor: '>>Error Semántico: ' + valor.tipo + ' no puede negarse' + "\n", tipo: "ERROR SEMANTICO" };
+            throw '>>Error Semántico: ' + valor.tipo + ' no puede negarse';
+        }
+    } else if (expresion.tipo === TIPO_OPERACION.SUMA
+        || expresion.tipo === TIPO_OPERACION.RESTA
+        || expresion.tipo === TIPO_OPERACION.MULTIPLICACION
+        || expresion.tipo === TIPO_OPERACION.DIVISION
+        || expresion.tipo === TIPO_OPERACION.MODULO
+        || expresion.tipo === TIPO_OPERACION.POTENCIA) {
+        var valorIzq = procesarExpresion(expresion.operandoIzq, tablaDeSimbolos);
+        var valorDer = procesarExpresion(expresion.operandoDer, tablaDeSimbolos);
+        // SUMA
+        if (expresion.tipo === TIPO_OPERACION.SUMA) {
+            if ((valorIzq.tipo === TIPO_DATO.CADENA || valorDer.tipo === TIPO_DATO.CADENA)) {
+                const res = valorIzq.valor + valorDer.valor
+                return { valor: res, tipo: TIPO_DATO.CADENA };
+            } else if ((valorIzq.tipo === TIPO_DATO.CARACTER && valorDer.tipo === TIPO_DATO.CARACTER)) {
+                const res = valorIzq.valor.charCodeAt(0) + valorDer.valor.charCodeAt(0);
+                return { valor: res, tipo: TIPO_DATO.ENTERO };
+            } else if ((valorIzq.tipo === TIPO_DATO.DECIMAL || valorDer.tipo === TIPO_DATO.DECIMAL) && (valorIzq.tipo !== TIPO_DATO.BOOLEAN && valorDer.tipo !== TIPO_DATO.BOOLEAN)) {
+                if (valorIzq.tipo === TIPO_DATO.CARACTER) valorIzq.valor = valorIzq.valor.charCodeAt(0);
+                if (valorDer.tipo === TIPO_DATO.CARACTER) valorDer.valor = valorDer.valor.charCodeAt(0);
+
+                const res = valorIzq.valor + valorDer.valor;
+                return { valor: res, tipo: TIPO_DATO.DECIMAL };
+            } else if ((valorIzq.tipo === TIPO_DATO.ENTERO || valorDer.tipo === TIPO_DATO.ENTERO) && (valorIzq.tipo !== TIPO_DATO.BOOLEAN && valorDer.tipo !== TIPO_DATO.BOOLEAN)) {
+                if (valorIzq.tipo === TIPO_DATO.CARACTER) valorIzq.valor = valorIzq.valor.charCodeAt(0);
+                if (valorDer.tipo === TIPO_DATO.CARACTER) valorDer.valor = valorDer.valor.charCodeAt(0);
+
+                const res = valorIzq.valor + valorDer.valor;
+                return { valor: res, tipo: TIPO_DATO.ENTERO };
+            } else {
+                return { valor: '>>Error Semántico: No se puede sumar ' + valorIzq.tipo + ' con ' + valorDer.tipo + "\n", tipo: "ERROR SEMANTICO" };
+            }
+        }
+        // RESTA
+        if (expresion.tipo === TIPO_OPERACION.RESTA) {
+            if (valorIzq.tipo === TIPO_DATO.CADENA || valorDer.tipo === TIPO_DATO.CADENA || valorIzq.tipo === TIPO_DATO.BOOLEAN || valorDer.tipo === TIPO_DATO.BOOLEAN) {
+                return { valor: '>>Error Semántico: No se puede restar ' + valorIzq.tipo + ' con ' + valorDer.tipo + "\n", tipo: "ERROR SEMANTICO" };
+            } else if ((valorIzq.tipo === TIPO_DATO.CARACTER && valorDer.tipo === TIPO_DATO.CARACTER)) {
+                const res = valorIzq.valor.charCodeAt(0) - valorDer.valor.charCodeAt(0);
+                return { valor: res, tipo: TIPO_DATO.ENTERO };
+            } else if (valorIzq.tipo === TIPO_DATO.DECIMAL || valorDer.tipo === TIPO_DATO.DECIMAL) {
+                if (valorIzq.tipo === TIPO_DATO.CARACTER) valorIzq.valor = valorIzq.valor.charCodeAt(0);
+                if (valorDer.tipo === TIPO_DATO.CARACTER) valorDer.valor = valorDer.valor.charCodeAt(0);
+
+                const res = valorIzq.valor - valorDer.valor;
+                return { valor: res, tipo: TIPO_DATO.DECIMAL };
+            } else if (valorIzq.tipo === TIPO_DATO.ENTERO || valorDer.tipo === TIPO_DATO.ENTERO) {
+                if (valorIzq.tipo === TIPO_DATO.CARACTER) valorIzq.valor = valorIzq.valor.charCodeAt(0);
+                if (valorDer.tipo === TIPO_DATO.CARACTER) valorDer.valor = valorDer.valor.charCodeAt(0);
+
+                const res = valorIzq.valor - valorDer.valor;
+                return { valor: res, tipo: TIPO_DATO.ENTERO };
+            }
+        }
+        //MULTIPLICACION
+        if (expresion.tipo === TIPO_OPERACION.MULTIPLICACION) {
+            if (valorIzq.tipo === TIPO_DATO.CADENA || valorDer.tipo === TIPO_DATO.CADENA || valorIzq.tipo === TIPO_DATO.BOOLEAN || valorDer.tipo === TIPO_DATO.BOOLEAN) {
+                return { valor: '>>Error Semántico: No se puede multiplicar ' + valorIzq.tipo + ' por ' + valorDer.tipo + "\n", tipo: "ERROR SEMANTICO" };
+            } else if (valorIzq.tipo === TIPO_DATO.DECIMAL || valorDer.tipo === TIPO_DATO.DECIMAL) {
+                if (valorIzq.tipo === TIPO_DATO.CARACTER) valorIzq.valor = valorIzq.valor.charCodeAt(0);
+                if (valorDer.tipo === TIPO_DATO.CARACTER) valorDer.valor = valorDer.valor.charCodeAt(0);
+
+                const res = valorIzq.valor * valorDer.valor;
+                return { valor: res, tipo: TIPO_DATO.DECIMAL };
+            } else if (valorIzq.tipo === TIPO_DATO.ENTERO || valorDer.tipo === TIPO_DATO.ENTERO) {
+                if (valorIzq.tipo === TIPO_DATO.CARACTER) valorIzq.valor = valorIzq.valor.charCodeAt(0);
+                if (valorDer.tipo === TIPO_DATO.CARACTER) valorDer.valor = valorDer.valor.charCodeAt(0);
+
+                const res = valorIzq.valor * valorDer.valor;
+                return { valor: res, tipo: TIPO_DATO.ENTERO };
+            } else if ((valorIzq.tipo === TIPO_DATO.CARACTER && valorDer.tipo === TIPO_DATO.CARACTER)) {
+                const res = valorIzq.valor.charCodeAt(0) * valorDer.valor.charCodeAt(0);
+                return { valor: res, tipo: TIPO_DATO.ENTERO };
+            }
+        }
+        //DIVISION
+        if (expresion.tipo === TIPO_OPERACION.DIVISION) {
+            if (valorIzq.tipo === TIPO_DATO.CARACTER) valorIzq.valor = valorIzq.valor.charCodeAt(0);
+            if (valorDer.tipo === TIPO_DATO.CARACTER) valorDer.valor = valorDer.valor.charCodeAt(0);
+
+            if (valorIzq.tipo === TIPO_DATO.CADENA || valorDer.tipo === TIPO_DATO.CADENA || valorIzq.tipo === TIPO_DATO.BOOLEAN || valorDer.tipo === TIPO_DATO.BOOLEAN) {
+                return { valor: '>>Error Semántico: No se puede dividir ' + valorIzq.tipo + ' entre ' + valorDer.tipo + "\n", tipo: "ERROR SEMANTICO" };
+            } else if (valorIzq.tipo === TIPO_DATO.DECIMAL || valorDer.tipo === TIPO_DATO.DECIMAL) {
+                if (valorDer.valor === 0) {
+                    return { valor: '>>ERROR la division entre 0 da como resultado: ' + valorIzq / valorDer, tipo: "ERROR" };
+                } else {
+                    const res = valorIzq.valor / valorDer.valor;
+                    return { valor: res, tipo: TIPO_DATO.DECIMAL };
+                }
+            } else if (valorIzq.tipo === TIPO_DATO.ENTERO || valorDer.tipo === TIPO_DATO.ENTERO) {
+                if (valorDer.valor === 0) {
+                    return { valor: '>>ERROR la division entre 0 da como resultado: ' + valorIzq / valorDer, tipo: "ERROR" };
+                } else {
+                    const res = Math.trunc(valorIzq.valor / valorDer.valor);
+                    return { valor: res, tipo: TIPO_DATO.ENTERO };
+                }
+            } else if ((valorIzq.tipo === TIPO_DATO.CARACTER && valorDer.tipo === TIPO_DATO.CARACTER)) {
+                if (valorDer.valor === 0) {
+                    return { valor: '>>ERROR la division entre 0 da como resultado: ' + valorIzq / valorDer, tipo: "ERROR" };
+                } else {
+                    const res = Math.trunc(valorIzq.valor / valorDer.valor);
+                    return { valor: res, tipo: TIPO_DATO.ENTERO };
+                }
+            }
+        }
+        //POTENCIA
+        if (expresion.tipo === TIPO_OPERACION.POTENCIA) {
+            if (valorIzq.tipo === TIPO_DATO.CADENA || valorDer.tipo === TIPO_DATO.CADENA || valorIzq.tipo === TIPO_DATO.BOOLEAN || valorDer.tipo === TIPO_DATO.BOOLEAN) {
+                return { valor: '>>Error Semántico: No se puede realizar la potencia con ' + valorIzq.tipo + ' y ' + valorDer.tipo + "\n", tipo: "ERROR SEMANTICO" };
+            } else {
+                if (valorIzq.tipo === TIPO_DATO.CARACTER) valorIzq.valor = valorIzq.valor.charCodeAt(0);
+                if (valorDer.tipo === TIPO_DATO.CARACTER) valorDer.valor = valorDer.valor.charCodeAt(0);
+
+                const res = Math.pow(valorIzq.valor, valorDer.valor);
+                return { valor: res, tipo: TIPO_DATO.DECIMAL };
+            }
+        }
+        // MODULO
+        if (expresion.tipo === TIPO_OPERACION.MODULO) {
+            if (valorIzq.tipo === TIPO_DATO.CADENA || valorDer.tipo === TIPO_DATO.CADENA || valorIzq.tipo === TIPO_DATO.BOOLEAN || valorDer.tipo === TIPO_DATO.BOOLEAN) {
+                return { valor: '>>Error Semántico: No se puede realizar el módulo con ' + valorIzq.tipo + ' y ' + valorDer.tipo + "\n", tipo: "ERROR SEMANTICO" };
+            } else {
+                if (valorIzq.tipo === TIPO_DATO.CARACTER) valorIzq.valor = valorIzq.valor.charCodeAt(0);
+                if (valorDer.tipo === TIPO_DATO.CARACTER) valorDer.valor = valorDer.valor.charCodeAt(0);
+
+                const res = valorIzq.valor % valorDer.valor;
+                return { valor: res, tipo: TIPO_DATO.DECIMAL };
+            }
+        }
+    } else if (expresion.tipo === TIPO_VALOR.ENTERO) {
+        return { valor: expresion.valor, tipo: TIPO_DATO.ENTERO };
+
+    } else if (expresion.tipo === TIPO_VALOR.DECIMAL) {
+        return { valor: expresion.valor, tipo: TIPO_DATO.DECIMAL };
+
+    } else if (expresion.tipo === TIPO_VALOR.CADENA) {
+        let cadena = expresion.valor
+        cadena = cadena.replaceAll('\\\\', '\\').replaceAll('\\\"', '\"').replaceAll('\\\'', '\'').replaceAll('\\n', '\n').replaceAll('\\t', '\t').replaceAll('\\r', '\r');
+        return { valor: cadena, tipo: TIPO_DATO.CADENA };
+
+    } else if (expresion.tipo === TIPO_VALOR.CARACTER) {
+        let char = expresion.valor
+        char = char.replaceAll('\\\\', '\\').replaceAll('\\\"', '\"').replaceAll('\\\'', '\'').replaceAll('\\n', '\n').replaceAll('\\t', '\t').replaceAll('\\r', '\r');
+        return { valor: char, tipo: TIPO_DATO.CARACTER };
+
+    } else if (expresion.tipo === TIPO_VALOR.BOOLEAN) {
+        return { valor: expresion.valor, tipo: TIPO_DATO.BOOLEAN };
+
+    } else if (expresion.tipo === TIPO_VALOR.IDENTIFICADOR) {
+        // SE RETORNA EL VALOR DE LA TABLA DE SIMBOLOS
+        const sym = tablaDeSimbolos.obtener(expresion.valor);
+        return { valor: sym.valor, tipo: sym.tipo };
+    } else if (expresion.tipo === TIPO_OPERACION.MAYOR_QUE
+        || expresion.tipo === TIPO_OPERACION.MENOR_QUE
+        || expresion.tipo === TIPO_OPERACION.MAYOR_IGUAL
+        || expresion.tipo === TIPO_OPERACION.MENOR_IGUAL
+        || expresion.tipo === TIPO_OPERACION.IGUAL_IGUAL
+        || expresion.tipo === TIPO_OPERACION.DIFERENTE) {
+        let valorIzq = procesarExpresion(expresion.operandoIzq, tablaDeSimbolos);
+        let valorDer = procesarExpresion(expresion.operandoDer, tablaDeSimbolos);
+
+        if (valorIzq.tipo === TIPO_DATO.CARACTER) valorIzq.valor = valorIzq.valor.charCodeAt(0);
+        if (valorDer.tipo === TIPO_DATO.CARACTER) valorDer.valor = valorDer.valor.charCodeAt(0);
+        if (valorIzq.tipo === TIPO_DATO.CADENA || valorDer.tipo === TIPO_DATO.CADENA || valorIzq.tipo === TIPO_DATO.BOOLEAN || valorDer.tipo === TIPO_DATO.BOOLEAN) {
+            return { valor: '>>Error semántico: no se puede relacionar ' + valorIzq.tipo + ' con ' + valorDer.tipo + "\n", tipo: "ERROR SEMANTICO" };
+        }
+        else if (valorIzq.tipo === TIPO_DATO.CADENA && valorDer.tipo === TIPO_DATO.CADENA
+            && (expresion.tipo === TIPO_OPERACION.IGUAL_IGUAL || expresion.tipo === TIPO_OPERACION.DIFERENTE)) {
+            if (expresion.tipo === TIPO_OPERACION.IGUAL_IGUAL) return { valor: valorIzq.valor === valorDer.valor, tipo: TIPO_DATO.BOOLEAN };
+            if (expresion.tipo === TIPO_OPERACION.DIFERENTE) return { valor: valorIzq.valor !== valorDer.valor, tipo: TIPO_DATO.BOOLEAN };
+        
+        } else if (valorIzq.tipo === TIPO_DATO.BOOLEAN && valorDer.tipo === TIPO_DATO.BOOLEAN
+            && (expresion.tipo === TIPO_OPERACION.IGUAL_IGUAL || expresion.tipo === TIPO_OPERACION.DIFERENTE)) {
+            if (expresion.tipo === TIPO_OPERACION.IGUAL_IGUAL) return { valor: valorIzq.valor === valorDer.valor, tipo: TIPO_DATO.BOOLEAN };
+            if (expresion.tipo === TIPO_OPERACION.DIFERENTE) return { valor: valorIzq.valor !== valorDer.valor, tipo: TIPO_DATO.BOOLEAN };
+        
+        } else {
+            if (expresion.tipo === TIPO_OPERACION.MAYOR_QUE) return { valor: valorIzq.valor > valorDer.valor, tipo: TIPO_DATO.BOOLEAN };
+            if (expresion.tipo === TIPO_OPERACION.MENOR_QUE) return { valor: valorIzq.valor < valorDer.valor, tipo: TIPO_DATO.BOOLEAN };
+            if (expresion.tipo === TIPO_OPERACION.MAYOR_IGUAL) return { valor: valorIzq.valor >= valorDer.valor, tipo: TIPO_DATO.BOOLEAN };
+            if (expresion.tipo === TIPO_OPERACION.MENOR_IGUAL) return { valor: valorIzq.valor <= valorDer.valor, tipo: TIPO_DATO.BOOLEAN };
+            if (expresion.tipo === TIPO_OPERACION.IGUAL_IGUAL) return { valor: valorIzq.valor === valorDer.valor, tipo: TIPO_DATO.BOOLEAN };
+            if (expresion.tipo === TIPO_OPERACION.DIFERENTE) return { valor: valorIzq.valor !== valorDer.valor, tipo: TIPO_DATO.BOOLEAN };
+        }
+    } else if (expresion.tipo === TIPO_OPERACION.AND
+        || expresion.tipo === TIPO_OPERACION.OR
+        || expresion.tipo === TIPO_OPERACION.XOR
+        || expresion.tipo === TIPO_OPERACION.NOT) {
+        let valorIzq = procesarExpresion(expresion.operandoIzq, tablaDeSimbolos);
+        let valorDer;
+        if(expresion.tipo !== TIPO_OPERACION.NOT) valorDer = procesarExpresion(expresion.operandoDer, tablaDeSimbolos);
+
+        if (expresion.tipo === TIPO_OPERACION.AND && valorIzq.tipo === TIPO_DATO.BOOLEAN && valorDer.tipo === TIPO_DATO.BOOLEAN) {
+            //AND
+            return { valor: valorIzq.valor && valorDer.valor, tipo: TIPO_DATO.BOOLEAN };
+        } else if (expresion.tipo === TIPO_OPERACION.OR && valorIzq.tipo === TIPO_DATO.BOOLEAN && valorDer.tipo === TIPO_DATO.BOOLEAN) {
+            //OR
+            return { valor: valorIzq.valor || valorDer.valor, tipo: TIPO_DATO.BOOLEAN };
+        } else if (expresion.tipo === TIPO_OPERACION.XOR && valorIzq.tipo === TIPO_DATO.BOOLEAN && valorDer.tipo === TIPO_DATO.BOOLEAN) {
+            //XOR
+            return { valor: Boolean(valorIzq.valor ^ valorDer.valor), tipo: TIPO_DATO.BOOLEAN };
+        } else if (expresion.tipo === TIPO_OPERACION.NOT && valorIzq.tipo === TIPO_DATO.BOOLEAN) {
+            //NOT
+            return { valor: !valorIzq.valor, tipo: TIPO_DATO.BOOLEAN };
+        } else {
+            return { valor: '>>Error semántico: solo se puede realizar operaciones lógicas con tipos de dato BOOLEAN\n', tipo: "ERROR SEMANTICO" };
+        }
+    } else if (expresion.tipo === TIPO_OPERACION.INCREMENTO) {
+        const val = procesarExpresion(expresion.expresion, tablaDeSimbolos);
+        return { valor: val.valor + 1, tipo: val.tipo };
+    } else if (expresion.tipo === TIPO_OPERACION.DECREMENTO) {
+        const val = procesarExpresion(expresion.expresion, tablaDeSimbolos);
+        return { valor: val.valor - 1, tipo: val.tipo };
+    } else {
+        return { valor: 'ERROR: expresión no válida: ' + expresion + "\n", tipo: "ERROR SEMANTICO" };
+    }
+}
+
+function procesarPrint(instruccion, tablaDeSimbolos) {
+    const cadena = procesarExpresion(instruccion.expresion, tablaDeSimbolos).valor;
+    return cadena;
+}
+
+function procesarPrintln(instruccion, tablaDeSimbolos) {
+    const cadena = procesarExpresion(instruccion.expresion, tablaDeSimbolos).valor;
+    return (cadena + "\n");
 }
 
 module.exports = analizar;

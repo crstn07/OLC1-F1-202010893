@@ -171,7 +171,7 @@ const instrucciones = {
 	},
 
 	//Else-If
-	 nuevoElse: function (expresion, instruccionesIf, If) {
+	 nuevoElseIf: function (expresion, instruccionesIf, If) {
 		return {
 			tipo: TIPO_INSTRUCCION.ELSE,
 			expresion: expresion,

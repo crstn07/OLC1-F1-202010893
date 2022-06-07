@@ -112,7 +112,7 @@ function App() {
               <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div className="modal-body">
-              <input type="file" className="form-control" aria-label="Upload" accept=".cst" onChange={abrirArchivo} required />
+              <input type="file" className="form-control" aria-label="Upload" accept=".LF" onChange={abrirArchivo} required />
             </div>
             <div className="modal-footer">
               <button type="button" className="btn btn-dark" data-bs-dismiss="modal">Ok</button>
