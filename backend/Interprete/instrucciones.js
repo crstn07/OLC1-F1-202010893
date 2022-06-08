@@ -28,8 +28,10 @@ const TIPO_OPERACION = {
 	NOT: 'OP_NOT',
     XOR: 'OP_XOR',
 
-	INCREMENTO: 'OP_INCREMENTO',
-	DECREMENTO: 'OP_DECREMENTO'
+	INCREMENTO_POST: 'OP_INCREMENTO_POST',
+	INCREMENTO_PRE: 'OP_INCREMENTO_PRE',
+	DECREMENTO_POST: 'OP_DECREMENTO_POST',
+	DECREMENTO_PRE: 'OP_DECREMENTO_PRE'
 };
 
 const TIPO_INSTRUCCION = {
@@ -89,17 +91,25 @@ const instrucciones = {
 		expresion: expresion
 	}),
 	
-	nuevoIncremento: (expresion) => ({
-		tipo: TIPO_OPERACION.INCREMENTO,
-		expresion: expresion
-	})
-	,
+	nuevoIncrementoPost: (identificador) => ({
+		tipo: TIPO_OPERACION.INCREMENTO_POST,
+		identificador: identificador
+	}),
 	
-	nuevoDecremento: (expresion) => ({
-		tipo: TIPO_OPERACION.DECREMENTO,
-		expresion: expresion
-	})
-	,
+	nuevoIncrementoPre: (identificador) => ({
+		tipo: TIPO_OPERACION.INCREMENTO_PRE,
+		identificador: identificador
+	}),
+	
+	nuevoDecrementoPost: (identificador) => ({
+		tipo: TIPO_OPERACION.DECREMENTO_POST,
+		identificador: identificador
+	}),	
+	
+	nuevoDecrementoPre: (identificador) => ({
+		tipo: TIPO_OPERACION.DECREMENTO_PRE,
+		identificador: identificador
+	}),
 
 	nuevoWhile: function (expresion, instrucciones) {
 		return {
@@ -127,11 +137,12 @@ const instrucciones = {
 		}
 	},
 
-	nuevaDeclaracion: function (identificador, tipo) {
+	nuevaDeclaracion: function (identificador, tipo_dato, tipoVariable) {
 		return {
 			tipo: TIPO_INSTRUCCION.DECLARACION,
 			identificador: identificador,
-			tipo_dato: tipo
+			tipo_dato: tipo_dato,
+			tipoVar: tipoVariable
 		}
 	},
 
@@ -139,16 +150,17 @@ const instrucciones = {
 		return {
 			tipo: TIPO_INSTRUCCION.ASIGNACION,
 			identificador: identificador,
-			expresion: expresion
+			expresion: expresion,
 		}
 	},
 
-   nuevaDeclaracionAsignacion: function (identificador, expresion, tipo_dato) {
+   nuevaDeclaracionAsignacion: function (identificador, expresion, tipo_dato, tipoVariable) {
 	   return {
 		   tipo: TIPO_INSTRUCCION.DECLARACION_ASIGNACION,
 		   identificador: identificador,
 		   expresion: expresion,
-		   tipo_dato: tipo_dato
+		   tipo_dato: tipo_dato,
+		   tipoVar: tipoVariable
 	   }
    },
 

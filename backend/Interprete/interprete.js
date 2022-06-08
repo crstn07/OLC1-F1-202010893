@@ -8,27 +8,28 @@ const TIPO_OPCION_SWITCH = require('./instrucciones').TIPO_OPCION_SWITCH;
 
 // Tabla de Simbolos
 const TIPO_DATO = require('./tablaSimbolos').TIPO_DATO;
-//const TS = require('./tablaSimbolos').TS;
+const TS = require('./tablaSimbolos').TS;
 
 var salida = "";
 
 function analizar(entrada) {
     salida = "";
-    let ast;
+    let ast_instrucciones;
 
     try {
-        ast = parser.parse(entrada.toString());
-        //fs.writeFileSync('./ast.json', JSON.stringify(ast, null, 2));
+        ast_instrucciones = parser.parse(entrada.toString());
+        console.log(ast_instrucciones)
+        //fs.writeFileSync('./ast.json', JSON.stringify(ast_instrucciones, null, 2));
     } catch (e) {
         console.error(e);
         return;
     }
 
     // Creación de una tabla de simbolos GLOBAL para iniciar con el interprete
-    //const tsGlobal = new TS([], []);
-    const tsGlobal = [];
+    const tsGlobal = new TS([]/*, []*/);
+
     // Procesa las instrucciones reconocidas en el AST
-    procesarBloque(ast, tsGlobal)
+    procesarBloque(ast_instrucciones, tsGlobal)
     return salida
 }
 
@@ -44,15 +45,6 @@ function procesarBloque(instrucciones, tablaDeSimbolos) {
         } else if (instruccion.tipo === TIPO_INSTRUCCION.PRINTLN) {
             // Procesando Instrucción Println
             salida += procesarPrintln(instruccion, tablaDeSimbolos);
-        } else if (instruccion.tipo === TIPO_INSTRUCCION.WHILE) {
-            // Procesando Instrucción While
-            procesarWhile(instruccion, tablaDeSimbolos);
-        } else if (instruccion.tipo === TIPO_INSTRUCCION.DOWHILE) {
-            // Procesando Instrucción DOWhile
-            procesarDoWhile(instruccion, tablaDeSimbolos);
-        } else if (instruccion.tipo == TIPO_INSTRUCCION.FOR) {
-            // Procesando Instrucción For
-            procesarFor(instruccion, tablaDeSimbolos);
         } else if (instruccion.tipo === TIPO_INSTRUCCION.DECLARACION) {
             // Procesando Instrucción Declaración
             procesarDeclaracion(instruccion, tablaDeSimbolos);
@@ -62,6 +54,27 @@ function procesarBloque(instrucciones, tablaDeSimbolos) {
         } else if (instruccion.tipo === TIPO_INSTRUCCION.DECLARACION_ASIGNACION) {
             // Procesando Instrucción Declaración Asignación
             procesarDeclaracionAsignacion(instruccion, tablaDeSimbolos);
+        } else if (instruccion.tipo === TIPO_OPERACION.INCREMENTO_POST) {
+            // Procesando Incremento Post
+            procesarIncrementoPost(instruccion, tablaDeSimbolos);
+        } else if (instruccion.tipo === TIPO_OPERACION.DECREMENTO_POST) {
+            // Procesando Decremento Post
+            procesarDecrementoPost(instruccion, tablaDeSimbolos);
+        } else if (instruccion.tipo === TIPO_OPERACION.INCREMENTO_PRE) {
+            // Procesando Incremento Pre
+            procesarIncrementoPre(instruccion, tablaDeSimbolos);
+        } else if (instruccion.tipo === TIPO_OPERACION.DECREMENTO_PRE) {
+            // Procesando Decremento Pre
+            procesarDecrementoPre(instruccion, tablaDeSimbolos);
+        } else if (instruccion.tipo === TIPO_INSTRUCCION.WHILE) {
+            // Procesando Instrucción While
+            procesarWhile(instruccion, tablaDeSimbolos);
+        } else if (instruccion.tipo === TIPO_INSTRUCCION.DOWHILE) {
+            // Procesando Instrucción DOWhile
+            procesarDoWhile(instruccion, tablaDeSimbolos);
+        } else if (instruccion.tipo == TIPO_INSTRUCCION.FOR) {
+            // Procesando Instrucción For
+            procesarFor(instruccion, tablaDeSimbolos);
         } else if (instruccion.tipo === TIPO_INSTRUCCION.IF) {
             // Procesando Instrucción If
             procesarIf(instruccion, tablaDeSimbolos);
@@ -256,20 +269,21 @@ function procesarExpresion(expresion, tablaDeSimbolos) {
 
         if (valorIzq.tipo === TIPO_DATO.CARACTER) valorIzq.valor = valorIzq.valor.charCodeAt(0);
         if (valorDer.tipo === TIPO_DATO.CARACTER) valorDer.valor = valorDer.valor.charCodeAt(0);
-        if (valorIzq.tipo === TIPO_DATO.CADENA || valorDer.tipo === TIPO_DATO.CADENA || valorIzq.tipo === TIPO_DATO.BOOLEAN || valorDer.tipo === TIPO_DATO.BOOLEAN) {
-            return { valor: '>>Error semántico: no se puede relacionar ' + valorIzq.tipo + ' con ' + valorDer.tipo + "\n", tipo: "ERROR SEMANTICO" };
-        }
-        else if (valorIzq.tipo === TIPO_DATO.CADENA && valorDer.tipo === TIPO_DATO.CADENA
+
+        if (valorIzq.tipo === TIPO_DATO.CADENA && valorDer.tipo === TIPO_DATO.CADENA
             && (expresion.tipo === TIPO_OPERACION.IGUAL_IGUAL || expresion.tipo === TIPO_OPERACION.DIFERENTE)) {
             if (expresion.tipo === TIPO_OPERACION.IGUAL_IGUAL) return { valor: valorIzq.valor === valorDer.valor, tipo: TIPO_DATO.BOOLEAN };
             if (expresion.tipo === TIPO_OPERACION.DIFERENTE) return { valor: valorIzq.valor !== valorDer.valor, tipo: TIPO_DATO.BOOLEAN };
-        
+
         } else if (valorIzq.tipo === TIPO_DATO.BOOLEAN && valorDer.tipo === TIPO_DATO.BOOLEAN
             && (expresion.tipo === TIPO_OPERACION.IGUAL_IGUAL || expresion.tipo === TIPO_OPERACION.DIFERENTE)) {
             if (expresion.tipo === TIPO_OPERACION.IGUAL_IGUAL) return { valor: valorIzq.valor === valorDer.valor, tipo: TIPO_DATO.BOOLEAN };
             if (expresion.tipo === TIPO_OPERACION.DIFERENTE) return { valor: valorIzq.valor !== valorDer.valor, tipo: TIPO_DATO.BOOLEAN };
-        
-        } else {
+
+        } else if (valorIzq.tipo === TIPO_DATO.CADENA || valorDer.tipo === TIPO_DATO.CADENA || valorIzq.tipo === TIPO_DATO.BOOLEAN || valorDer.tipo === TIPO_DATO.BOOLEAN) {
+            return { valor: '>>Error semántico: no se puede relacionar ' + valorIzq.tipo + ' con ' + valorDer.tipo + "\n", tipo: "ERROR SEMANTICO" };
+        }
+        else {
             if (expresion.tipo === TIPO_OPERACION.MAYOR_QUE) return { valor: valorIzq.valor > valorDer.valor, tipo: TIPO_DATO.BOOLEAN };
             if (expresion.tipo === TIPO_OPERACION.MENOR_QUE) return { valor: valorIzq.valor < valorDer.valor, tipo: TIPO_DATO.BOOLEAN };
             if (expresion.tipo === TIPO_OPERACION.MAYOR_IGUAL) return { valor: valorIzq.valor >= valorDer.valor, tipo: TIPO_DATO.BOOLEAN };
@@ -283,7 +297,7 @@ function procesarExpresion(expresion, tablaDeSimbolos) {
         || expresion.tipo === TIPO_OPERACION.NOT) {
         let valorIzq = procesarExpresion(expresion.operandoIzq, tablaDeSimbolos);
         let valorDer;
-        if(expresion.tipo !== TIPO_OPERACION.NOT) valorDer = procesarExpresion(expresion.operandoDer, tablaDeSimbolos);
+        if (expresion.tipo !== TIPO_OPERACION.NOT) valorDer = procesarExpresion(expresion.operandoDer, tablaDeSimbolos);
 
         if (expresion.tipo === TIPO_OPERACION.AND && valorIzq.tipo === TIPO_DATO.BOOLEAN && valorDer.tipo === TIPO_DATO.BOOLEAN) {
             //AND
@@ -319,6 +333,55 @@ function procesarPrint(instruccion, tablaDeSimbolos) {
 function procesarPrintln(instruccion, tablaDeSimbolos) {
     const cadena = procesarExpresion(instruccion.expresion, tablaDeSimbolos).valor;
     return (cadena + "\n");
+}
+
+function procesarDeclaracion(instruccion, tablaDeSimbolos) {
+    tablaDeSimbolos.agregar(instruccion.identificador, instruccion.tipo_dato, undefined, instruccion.tipoVar);
+}
+
+function procesarAsignacion(instruccion, tablaDeSimbolos) {
+    const valor = procesarExpresion(instruccion.expresion, tablaDeSimbolos);
+    tablaDeSimbolos.actualizar(instruccion.identificador, valor);
+}
+
+function procesarDeclaracionAsignacion(instruccion, tablaDeSimbolos) {
+    const valor = procesarExpresion(instruccion.expresion, tablaDeSimbolos);
+    tablaDeSimbolos.agregar(instruccion.identificador, instruccion.tipo_dato, valor, instruccion.tipoVar);
+}
+
+function procesarIncrementoPost(instruccion, tablaDeSimbolos) {
+    let valor = tablaDeSimbolos.obtener(instruccion.identificador);//procesarExpresion({ operandoIzq: { tipo: 'VAL_IDENTIFICADOR', valor: instruccion.identificador }, operandoDer: { tipo: 'VAL_ENTERO', valor: 1 }, tipo: 'OP_SUMA' });
+    valor.valor++;
+    tablaDeSimbolos.actualizar(instruccion.identificador, valor);
+    if (valor.tipo === TIPO_DATO.ENTERO) {
+        return { tipo: TIPO_VALOR.ENTERO, valor: valor-- }
+    } else if (valor.tipo === TIPO_DATO.DECIMAL) {
+        return { tipo: TIPO_VALOR.DECIMAL, valor: valor-- }
+    }else if (valor.tipo === TIPO_DATO.BOOLEAN) {
+        return { tipo: TIPO_VALOR.BOOLEAN, valor: valor-- }
+    }else if (valor.tipo === TIPO_DATO.BOOLEAN) {
+        return { tipo: TIPO_VALOR.BOOLEAN, valor: valor-- }
+    }else if (valor.tipo === TIPO_DATO.CADENA) {
+        return { tipo: TIPO_VALOR.CADENA, valor: valor-- }
+    }else if (valor.tipo === TIPO_DATO.CARACTER) {
+        return { tipo: TIPO_VALOR.CARACTER, valor: valor-- }
+    }
+
+}
+
+function procesarIncrementoPre(instruccion, tablaDeSimbolos) {
+
+    tablaDeSimbolos.actualizar(instruccion.identificador, valor);
+}
+
+function procesarDecrementoPost(instruccion, tablaDeSimbolos) {
+
+    tablaDeSimbolos.actualizar(instruccion.identificador, valor);
+}
+
+function procesarDecrementoPre(instruccion, tablaDeSimbolos) {
+
+    tablaDeSimbolos.actualizar(instruccion.identificador, valor);
 }
 
 module.exports = analizar;

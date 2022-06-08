@@ -2,6 +2,7 @@
 	const TIPO_OPERACION	= require('../interprete/instrucciones').TIPO_OPERACION;
 	const TIPO_VALOR 		= require('../interprete/instrucciones').TIPO_VALOR;
 	const TIPO_DATO			= require('../interprete/tablaSimbolos').TIPO_DATO; 
+	const TIPO_VARIABLE		= require('../interprete/tablaSimbolos').TIPO_VARIABLE; 
 	const instrucciones	    = require('../interprete/instrucciones').instrucciones;
 %}
 
@@ -177,17 +178,26 @@ declaracion_asignacion
 	| asignacion PTCOMA  { $$ = $1; }
 ;
 declaracion
-	: tipo identificadores PTCOMA						{ $$ = instrucciones.nuevaDeclaracion($2, $1); }
-	| tipo identificadores IGUAL expresion PTCOMA		{ $$ = instrucciones.nuevaDeclaracionAsignacion($2, $4, $1); }
+	: tipo identificadores PTCOMA						{ $$ = instrucciones.nuevaDeclaracion($2, $1, TIPO_VARIABLE.VARIABLE); }
+	| tipo identificadores IGUAL expresion PTCOMA		{ $$ = instrucciones.nuevaDeclaracionAsignacion($2, $4, $1, TIPO_VARIABLE.VARIABLE); }
+	| CONST tipo identificadores PTCOMA						{ $$ = instrucciones.nuevaDeclaracion($3, $2, TIPO_VARIABLE.CONSTANTE); }
+	| CONST tipo identificadores IGUAL expresion PTCOMA		{ $$ = instrucciones.nuevaDeclaracionAsignacion($3, $5, $2, TIPO_VARIABLE.CONSTANTE); }
 ;
 asignacion
 	: IDENTIFICADOR IGUAL expresion				{ $$ = instrucciones.nuevaAsignacion($1, $3); } 
 	//Incremento y Decremento - PENDIENTE
-	//| IDENTIFICADOR MAS MAS						{ $$ = instrucciones.nuevaAsignacion($1, {operandoIzq: { tipo: 'VAL_IDENTIFICADOR', valor: $1 },operandoDer: { tipo: 'VAL_ENTERO', valor: 1 },tipo: 'OP_SUMA'});} 
-	//| IDENTIFICADOR MENOS MENOS					{ $$ = instrucciones.nuevaAsignacion($1, {operandoIzq: { tipo: 'VAL_IDENTIFICADOR', valor: $1 },operandoDer: { tipo: 'VAL_ENTERO', valor: 1 },tipo: 'OP_RESTA'}); } 
+	| incremento					//{ $$ = instrucciones.nuevaAsignacion($1, {operandoIzq: { tipo: 'VAL_IDENTIFICADOR', valor: $1 },operandoDer: { tipo: 'VAL_ENTERO', valor: 1 },tipo: 'OP_SUMA'});} 
+	| decremento					//{ $$ = instrucciones.nuevaAsignacion($1, {operandoIzq: { tipo: 'VAL_IDENTIFICADOR', valor: $1 },operandoDer: { tipo: 'VAL_ENTERO', valor: 1 },tipo: 'OP_RESTA'}); } 
 ;
-
- expresion
+incremento
+	: IDENTIFICADOR MAS MAS			{ $$ = instrucciones.nuevoIncrementoPost($1);}
+	| MAS MAS IDENTIFICADOR 		{ $$ = instrucciones.nuevoIncrementoPre($3);}
+;					
+decremento
+	: IDENTIFICADOR MENOS MENOS		{ $$ = instrucciones.nuevoDecrementoPost($1);}
+	| MENOS MENOS IDENTIFICADOR		{ $$ = instrucciones.nuevoDecrementoPre($3);}
+;
+expresion
 	//Expresion Aritmetica
 	: MENOS expresion %prec UMENOS					{ $$ = instrucciones.nuevaOperacionUnaria($2, TIPO_OPERACION.NEGATIVO); }
 	| expresion MAS expresion						{ $$ = instrucciones.nuevaOperacionBinaria($1, $3, TIPO_OPERACION.SUMA); }
@@ -217,6 +227,6 @@ asignacion
 	| expresion XOR expresion 						{ $$ = instrucciones.nuevaOperacionBinaria($1, $3, TIPO_OPERACION.XOR); }
     | NOT expresion 								{ $$ = instrucciones.nuevaOperacionUnaria($2, TIPO_OPERACION.NOT); }
 	//Incremento y Decremento - PENDIENTE
-	//| expresion MAS MAS  							{ $$ = instrucciones.nuevoIncremento($1);}
-	//| expresion MENOS MENOS 						{ $$ = instrucciones.nuevoDecremento($1);}
+	//| incremento  									{ $$ = $1; }
+	//| decremento 									{ $$ = $1; }
 ;
