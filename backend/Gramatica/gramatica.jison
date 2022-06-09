@@ -42,7 +42,7 @@
 "call"				return 'CALL';
 "const"				return 'CONST';
 
-//":"					return 'DOSPTS';
+":"					return 'DOSPTS';
 ";"					return 'PTCOMA';
 ","					return 'COMA';
 "{"					return 'LLAVE_ABRE';
@@ -52,6 +52,8 @@
 //"["					return 'CORCHETE_ABRE';
 //"]"					return 'CORCHETE_CIERRA';
 
+"++"				return 'INCREMENTO';
+"--"				return 'DECREMENTO';
 "+"					return 'MAS';
 "-"					return 'MENOS';
 "**"				return 'POTENCIA';
@@ -153,14 +155,15 @@ if
 	: IF expresion statement                { $$ = instrucciones.nuevoIf($2, $3); }
 	| IF expresion statement ELSE if        { $$ = instrucciones.nuevoElseIf($2, $3, $5); }
 	| IF expresion statement ELSE statement { $$ = instrucciones.nuevoIfElse($2, $3, $5); }
-    | IF expresion instruccion PTCOMA       { $$ = instrucciones.nuevoIf($2, $3); }
-	| IF expresion instruccion PTCOMA ELSE if      { $$ = instrucciones.nuevoElse($2, $3, $6); }
-	| IF expresion instruccion PTCOMA ELSE instruccion PTCOMA     { $$ = instrucciones.nuevoIfElse($2, $3, $6); } 
+    | IF expresion instruccion 		        { $$ = instrucciones.nuevoIf($2, [$3]); }
+	| IF expresion instruccion ELSE if      { $$ = instrucciones.nuevoElseIf($2, [$3], $5); }
+	| IF expresion instruccion ELSE instruccion     { $$ = instrucciones.nuevoIfElse($2, [$3], [$5]); } 
 ;
 
 statement
-    : LLAVE_ABRE instrucciones LLAVE_CIERRA         { $$ = $2; }
-    | LLAVE_ABRE LLAVE_CIERRA                       { $$ = []; }
+    : LLAVE_ABRE instrucciones LLAVE_CIERRA     { $$ = $2; }
+    | LLAVE_ABRE LLAVE_CIERRA					{ $$ = []; }
+	//| instruccion								{ $$ = $1; }	
 ;
 
 casos 
@@ -186,16 +189,16 @@ declaracion
 asignacion
 	: IDENTIFICADOR IGUAL expresion				{ $$ = instrucciones.nuevaAsignacion($1, $3); } 
 	//Incremento y Decremento - PENDIENTE
-	| incremento					//{ $$ = instrucciones.nuevaAsignacion($1, {operandoIzq: { tipo: 'VAL_IDENTIFICADOR', valor: $1 },operandoDer: { tipo: 'VAL_ENTERO', valor: 1 },tipo: 'OP_SUMA'});} 
-	| decremento					//{ $$ = instrucciones.nuevaAsignacion($1, {operandoIzq: { tipo: 'VAL_IDENTIFICADOR', valor: $1 },operandoDer: { tipo: 'VAL_ENTERO', valor: 1 },tipo: 'OP_RESTA'}); } 
+	| incremento					{ $$ = $1; } 
+	| decremento					{ $$ = $1; } 
 ;
 incremento
-	: IDENTIFICADOR MAS MAS			{ $$ = instrucciones.nuevoIncrementoPost($1);}
-	| MAS MAS IDENTIFICADOR 		{ $$ = instrucciones.nuevoIncrementoPre($3);}
+	: IDENTIFICADOR INCREMENTO		{ $$ = instrucciones.nuevoIncrementoPost($1);}
+	| INCREMENTO IDENTIFICADOR 		{ $$ = instrucciones.nuevoIncrementoPre($2);}
 ;					
 decremento
-	: IDENTIFICADOR MENOS MENOS		{ $$ = instrucciones.nuevoDecrementoPost($1);}
-	| MENOS MENOS IDENTIFICADOR		{ $$ = instrucciones.nuevoDecrementoPre($3);}
+	: IDENTIFICADOR DECREMENTO		{ $$ = instrucciones.nuevoDecrementoPost($1);}
+	| DECREMENTO IDENTIFICADOR		{ $$ = instrucciones.nuevoDecrementoPre($2);}
 ;
 expresion
 	//Expresion Aritmetica
@@ -227,11 +230,11 @@ expresion
 	| expresion XOR expresion 						{ $$ = instrucciones.nuevaOperacionBinaria($1, $3, TIPO_OPERACION.XOR); }
     | NOT expresion 								{ $$ = instrucciones.nuevaOperacionUnaria($2, TIPO_OPERACION.NOT); }
 	//Incremento y Decremento - PENDIENTE
-	//| incremento  									{ $$ = $1; }
-	//| decremento 									{ $$ = $1; }
-	| expresion MAS MAS			{ $$ = instrucciones.nuevoIncrementoPost($1);}
-	| MAS MAS expresion 		{ $$ = instrucciones.nuevoIncrementoPre($3);}
-	| expresion MENOS MENOS		{ $$ = instrucciones.nuevoDecrementoPost($1);}
-	| MENOS MENOS expresion		{ $$ = instrucciones.nuevoDecrementoPre($3);}
+	| incremento  									{ $$ = $1; }
+	| decremento 									{ $$ = $1; }
+	//| expresion MAS MAS			{ $$ = instrucciones.nuevoIncrementoPost($1);}
+	//| MAS MAS expresion 		{ $$ = instrucciones.nuevoIncrementoPre($3);}
+	//| expresion MENOS MENOS		{ $$ = instrucciones.nuevoDecrementoPost($1);}
+	//| MENOS MENOS expresion		{ $$ = instrucciones.nuevoDecrementoPre($3);}
 ;
 

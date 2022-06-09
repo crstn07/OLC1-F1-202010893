@@ -402,14 +402,11 @@ function procesarDoWhile(instruccion, tablaDeSimbolos) {
 function procesarFor(instruccion, tablaDeSimbolos) {
     let copiaArray = tablaDeSimbolos.simbolos.slice();
     const tsFor = new TS(copiaArray/*, tablaDeSimbolos.metodos*/);
-    console.log("--------------------------INSTRUCCION---------------------\n", instruccion)
     if (instruccion.variable.tipo === TIPO_INSTRUCCION.ASIGNACION) {
         //LA VARIABLE YA HA SIDO DECLARADA EN EL AMBITO PADRE Y SE ASIGNA VALOR
         procesarAsignacion(instruccion.variable, tablaDeSimbolos /*Verificar por tsFor*/);
     } else if (instruccion.variable.tipo === TIPO_INSTRUCCION.DECLARACION_ASIGNACION) {
-        //LA VARIABLE SE DECLARA EN EL AMBITO LOCAL Y SE ASIGNA DE UNA VEZ   
-        console.log("Variable: ", instruccion.variable)
-        console.log("Tabla: ", tsFor)    
+        //LA VARIABLE SE DECLARA EN EL AMBITO LOCAL Y SE ASIGNA DE UNA VEZ       
         procesarDeclaracionAsignacion(instruccion.variable, tsFor);
     }
     while (procesarExpresion(instruccion.expresion, tsFor).valor) {
@@ -423,6 +420,60 @@ function procesarFor(instruccion, tablaDeSimbolos) {
 
 }
 
+function procesarIf(instruccion, tablaDeSimbolos) {
+    const condicion = procesarExpresion(instruccion.expresion, tablaDeSimbolos);
+    if (condicion.valor) {
+        let copiaArray = tablaDeSimbolos.simbolos.slice();
+        const /*Eliminar el Const si no funciona*/tsIf = new TS(copiaArray/*, tablaDeSimbolos.metodos*/);
+        procesarBloque(instruccion.instrucciones, tsIf);
+    }
+}
 
+function procesarIfElse(instruccion, tablaDeSimbolos) {
+    const condicion = procesarExpresion(instruccion.expresion, tablaDeSimbolos);
+    if (condicion.valor) {
+        let copiaArray = tablaDeSimbolos.simbolos.slice();
+        const tsIf = new TS(copiaArray/*, tablaDeSimbolos.metodos*/);
+        procesarBloque(instruccion.instruccionesIfVerdadero, tsIf);
+    } else {
+        let copiaArray = tablaDeSimbolos.simbolos.slice();
+        const tsElse = new TS(copiaArray/*, tablaDeSimbolos.metodos*/);;
+        procesarBloque(instruccion.instruccionesIfFalso, tsElse);
+    }
+}
+
+function procesarElseIf(instruccion, tablaDeSimbolos) {
+    const condicion = procesarExpresion(instruccion.expresion, tablaDeSimbolos);
+    if (condicion.valor) {
+        let copiaArray = tablaDeSimbolos.simbolos.slice();
+        const tsIf = new TS(copiaArray/*, tablaDeSimbolos.metodos*/);
+        procesarBloque(instruccion.instruccionesIf, tsIf);
+    } else {
+        if (instruccion.if.tipo === TIPO_INSTRUCCION.IF_ELSE) procesarIfElse(instruccion.if, tablaDeSimbolos);
+        if (instruccion.if.tipo === TIPO_INSTRUCCION.IF) procesarIf(instruccion.if, tablaDeSimbolos);
+        if (instruccion.if.tipo === TIPO_INSTRUCCION.ELSE_IF) procesarElseIf(instruccion.if, tablaDeSimbolos);
+    }
+}
+
+function procesarSwitch(instruccion, tablaDeSimbolos) {
+    let match = false;
+    var def;
+    const valorExpresion = procesarExpresion(instruccion.expresion, tablaDeSimbolos);
+    let copiaArray = tablaDeSimbolos.simbolos.slice();
+    const tsSwitch = new TS(copiaArray/*, tablaDeSimbolos.metodos*/);
+    instruccion.casos.forEach(caso => {
+        if (caso.tipo == TIPO_OPCION_SWITCH.CASE) {
+            const valorExpCase = procesarExpresion(caso.expresion, tsSwitch);
+            if (valorExpCase.valor == valorExpresion.valor) {
+                procesarBloque(caso.instrucciones, tsSwitch);
+                match = true;
+            }
+        }
+        else {
+            def = caso;
+        }
+    });
+    if (!match) procesarBloque(def.instrucciones, tsSwitch);
+}
 
 module.exports = analizar;
