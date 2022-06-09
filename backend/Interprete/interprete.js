@@ -81,9 +81,9 @@ function procesarBloque(instrucciones, tablaDeSimbolos) {
         } else if (instruccion.tipo === TIPO_INSTRUCCION.IF_ELSE) {
             // Procesando Instrucción If Else
             procesarIfElse(instruccion, tablaDeSimbolos);
-        } else if (instruccion.tipo === TIPO_INSTRUCCION.ELSE) {
-            // Procesando Instrucción Else
-            procesarElse(instruccion, tablaDeSimbolos);
+        } else if (instruccion.tipo === TIPO_INSTRUCCION.ELSE_IF) {
+            // Procesando Instrucción Else If
+            procesarElseIf(instruccion, tablaDeSimbolos);
         } else if (instruccion.tipo === TIPO_INSTRUCCION.SWITCH) {
             // Procesando Instrucción Switch  
             procesarSwitch(instruccion, tablaDeSimbolos);
@@ -315,16 +315,16 @@ function procesarExpresion(expresion, tablaDeSimbolos) {
             return { valor: '>>Error semántico: solo se puede realizar operaciones lógicas con tipos de dato BOOLEAN\n', tipo: "ERROR SEMANTICO" };
         }
     } else if (expresion.tipo === TIPO_OPERACION.INCREMENTO_POST) {
-        expresion.identificador = expresion.identificador.valor;
+        if (expresion.identificador.valor != undefined) expresion.identificador = expresion.identificador.valor;
         return procesarIncrementoPost(expresion, tablaDeSimbolos);
     } else if (expresion.tipo === TIPO_OPERACION.DECREMENTO_POST) {
-        expresion.identificador = expresion.identificador.valor;
+        if (expresion.identificador.valor != undefined) expresion.identificador = expresion.identificador.valor;
         return procesarDecrementoPost(expresion, tablaDeSimbolos);
     } else if (expresion.tipo === TIPO_OPERACION.INCREMENTO_PRE) {
-        expresion.identificador = expresion.identificador.valor;
+        if (expresion.identificador.valor != undefined) expresion.identificador = expresion.identificador.valor;
         return procesarIncrementoPre(expresion, tablaDeSimbolos);
     } else if (expresion.tipo === TIPO_OPERACION.DECREMENTO_PRE) {
-        expresion.identificador = expresion.identificador.valor;
+        if (expresion.identificador.valor != undefined) expresion.identificador = expresion.identificador.valor;
         return procesarDecrementoPre(expresion, tablaDeSimbolos);
     } else {
         return { valor: 'ERROR: expresión no válida: ' + expresion + "\n", tipo: "ERROR SEMANTICO" };
@@ -366,7 +366,7 @@ function procesarIncrementoPre(instruccion, tablaDeSimbolos) {
     let valor = tablaDeSimbolos.obtener(instruccion.identificador);
     valor.valor++;
     tablaDeSimbolos.actualizar(instruccion.identificador, valor);
-    return { tipo: valor.tipo, valor: valor.valor}
+    return { tipo: valor.tipo, valor: valor.valor }
 }
 
 function procesarDecrementoPost(instruccion, tablaDeSimbolos) {
@@ -382,5 +382,47 @@ function procesarDecrementoPre(instruccion, tablaDeSimbolos) {
     tablaDeSimbolos.actualizar(instruccion.identificador, valor);
     return { tipo: valor.tipo, valor: valor.valor }
 }
+
+function procesarWhile(instruccion, tablaDeSimbolos) {
+    while (procesarExpresion(instruccion.expresion, tablaDeSimbolos).valor) {
+        let copiaArray = tablaDeSimbolos.simbolos.slice();
+        const tsWhile = new TS(copiaArray/*, tablaDeSimbolos.metodos*/);
+        procesarBloque(instruccion.instrucciones, tsWhile);
+    }
+}
+
+function procesarDoWhile(instruccion, tablaDeSimbolos) {
+    do {
+        let copiaArray = tablaDeSimbolos.simbolos.slice();
+        const tsDoWhile = new TS(copiaArray/*, tablaDeSimbolos.metodos*/);
+        procesarBloque(instruccion.instrucciones, tsDoWhile);
+    } while (procesarExpresion(instruccion.expresion, tablaDeSimbolos).valor);
+}
+
+function procesarFor(instruccion, tablaDeSimbolos) {
+    let copiaArray = tablaDeSimbolos.simbolos.slice();
+    const tsFor = new TS(copiaArray/*, tablaDeSimbolos.metodos*/);
+    console.log("--------------------------INSTRUCCION---------------------\n", instruccion)
+    if (instruccion.variable.tipo === TIPO_INSTRUCCION.ASIGNACION) {
+        //LA VARIABLE YA HA SIDO DECLARADA EN EL AMBITO PADRE Y SE ASIGNA VALOR
+        procesarAsignacion(instruccion.variable, tablaDeSimbolos /*Verificar por tsFor*/);
+    } else if (instruccion.variable.tipo === TIPO_INSTRUCCION.DECLARACION_ASIGNACION) {
+        //LA VARIABLE SE DECLARA EN EL AMBITO LOCAL Y SE ASIGNA DE UNA VEZ   
+        console.log("Variable: ", instruccion.variable)
+        console.log("Tabla: ", tsFor)    
+        procesarDeclaracionAsignacion(instruccion.variable, tsFor);
+    }
+    while (procesarExpresion(instruccion.expresion, tsFor).valor) {
+        //let copiaArray = tsLocal.simbolos.slice();
+        //const tsFor = new TS(copiaArray/*, tablaDeSimbolos.metodos*/);
+        procesarBloque(instruccion.instrucciones, tsFor);
+        if (instruccion.aumento.tipo !== TIPO_INSTRUCCION.ASIGNACION) procesarExpresion(instruccion.aumento, tsFor);
+        else procesarAsignacion(instruccion.aumento, tsFor);
+    }
+
+
+}
+
+
 
 module.exports = analizar;

@@ -85,6 +85,7 @@ class TS {
                 }
             } else {
                 console.error('>>Error Sémantico: la variable "' + ID.toLowerCase() + '" ya fue declarada')
+                //throw new error('>>Error Sémantico: la variable "' + ID.toLowerCase() + '" ya fue declarada');
             }
 
         })

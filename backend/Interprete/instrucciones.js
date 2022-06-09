@@ -43,7 +43,7 @@ const TIPO_INSTRUCCION = {
 	DECLARACION_ASIGNACION:'INSTR_DECLARACION_ASIGNACION',
 	IF: 'INSTR_IF',
 	IF_ELSE: 'INSTR_IF_ELSE',
-	ELSE: 'INSTR_ELSE',
+	ELSE_IF: 'INSTR_ELSE_IF',
 	FOR: 'INSTR_FOR',
 	SWITCH: 'INSTR_SWITCH',
 	DOWHILE: 'INSTR_DOWHILE',
@@ -119,7 +119,7 @@ const instrucciones = {
 		};
 	},
 
-	 nuevoDoWhile: function (expresion, instrucciones) {
+	 nuevoDoWhile: function (instrucciones, expresion) {
 		return {
 			tipo: TIPO_INSTRUCCION.DOWHILE,
 			expresion: expresion,
@@ -185,7 +185,7 @@ const instrucciones = {
 	//Else-If
 	 nuevoElseIf: function (expresion, instruccionesIf, If) {
 		return {
-			tipo: TIPO_INSTRUCCION.ELSE,
+			tipo: TIPO_INSTRUCCION.ELSE_IF,
 			expresion: expresion,
 			instruccionesIf: instruccionesIf,
 			if: If
