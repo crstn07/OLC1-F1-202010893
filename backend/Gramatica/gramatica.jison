@@ -229,4 +229,9 @@ expresion
 	//Incremento y Decremento - PENDIENTE
 	//| incremento  									{ $$ = $1; }
 	//| decremento 									{ $$ = $1; }
+	| expresion MAS MAS			{ $$ = instrucciones.nuevoIncrementoPost($1);}
+	| MAS MAS expresion 		{ $$ = instrucciones.nuevoIncrementoPre($3);}
+	| expresion MENOS MENOS		{ $$ = instrucciones.nuevoDecrementoPost($1);}
+	| MENOS MENOS expresion		{ $$ = instrucciones.nuevoDecrementoPre($3);}
 ;
+

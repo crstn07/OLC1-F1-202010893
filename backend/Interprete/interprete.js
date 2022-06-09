@@ -314,12 +314,18 @@ function procesarExpresion(expresion, tablaDeSimbolos) {
         } else {
             return { valor: '>>Error semántico: solo se puede realizar operaciones lógicas con tipos de dato BOOLEAN\n', tipo: "ERROR SEMANTICO" };
         }
-    } else if (expresion.tipo === TIPO_OPERACION.INCREMENTO) {
-        const val = procesarExpresion(expresion.expresion, tablaDeSimbolos);
-        return { valor: val.valor + 1, tipo: val.tipo };
-    } else if (expresion.tipo === TIPO_OPERACION.DECREMENTO) {
-        const val = procesarExpresion(expresion.expresion, tablaDeSimbolos);
-        return { valor: val.valor - 1, tipo: val.tipo };
+    } else if (expresion.tipo === TIPO_OPERACION.INCREMENTO_POST) {
+        expresion.identificador = expresion.identificador.valor;
+        return procesarIncrementoPost(expresion, tablaDeSimbolos);
+    } else if (expresion.tipo === TIPO_OPERACION.DECREMENTO_POST) {
+        expresion.identificador = expresion.identificador.valor;
+        return procesarDecrementoPost(expresion, tablaDeSimbolos);
+    } else if (expresion.tipo === TIPO_OPERACION.INCREMENTO_PRE) {
+        expresion.identificador = expresion.identificador.valor;
+        return procesarIncrementoPre(expresion, tablaDeSimbolos);
+    } else if (expresion.tipo === TIPO_OPERACION.DECREMENTO_PRE) {
+        expresion.identificador = expresion.identificador.valor;
+        return procesarDecrementoPre(expresion, tablaDeSimbolos);
     } else {
         return { valor: 'ERROR: expresión no válida: ' + expresion + "\n", tipo: "ERROR SEMANTICO" };
     }
@@ -350,38 +356,31 @@ function procesarDeclaracionAsignacion(instruccion, tablaDeSimbolos) {
 }
 
 function procesarIncrementoPost(instruccion, tablaDeSimbolos) {
-    let valor = tablaDeSimbolos.obtener(instruccion.identificador);//procesarExpresion({ operandoIzq: { tipo: 'VAL_IDENTIFICADOR', valor: instruccion.identificador }, operandoDer: { tipo: 'VAL_ENTERO', valor: 1 }, tipo: 'OP_SUMA' });
+    let valor = tablaDeSimbolos.obtener(instruccion.identificador);
     valor.valor++;
     tablaDeSimbolos.actualizar(instruccion.identificador, valor);
-    if (valor.tipo === TIPO_DATO.ENTERO) {
-        return { tipo: TIPO_VALOR.ENTERO, valor: valor-- }
-    } else if (valor.tipo === TIPO_DATO.DECIMAL) {
-        return { tipo: TIPO_VALOR.DECIMAL, valor: valor-- }
-    }else if (valor.tipo === TIPO_DATO.BOOLEAN) {
-        return { tipo: TIPO_VALOR.BOOLEAN, valor: valor-- }
-    }else if (valor.tipo === TIPO_DATO.BOOLEAN) {
-        return { tipo: TIPO_VALOR.BOOLEAN, valor: valor-- }
-    }else if (valor.tipo === TIPO_DATO.CADENA) {
-        return { tipo: TIPO_VALOR.CADENA, valor: valor-- }
-    }else if (valor.tipo === TIPO_DATO.CARACTER) {
-        return { tipo: TIPO_VALOR.CARACTER, valor: valor-- }
-    }
-
+    return { tipo: valor.tipo, valor: valor.valor - 1 }
 }
 
 function procesarIncrementoPre(instruccion, tablaDeSimbolos) {
-
+    let valor = tablaDeSimbolos.obtener(instruccion.identificador);
+    valor.valor++;
     tablaDeSimbolos.actualizar(instruccion.identificador, valor);
+    return { tipo: valor.tipo, valor: valor.valor}
 }
 
 function procesarDecrementoPost(instruccion, tablaDeSimbolos) {
-
+    let valor = tablaDeSimbolos.obtener(instruccion.identificador);
+    valor.valor--;
     tablaDeSimbolos.actualizar(instruccion.identificador, valor);
+    return { tipo: valor.tipo, valor: valor.valor + 1 }
 }
 
 function procesarDecrementoPre(instruccion, tablaDeSimbolos) {
-
+    let valor = tablaDeSimbolos.obtener(instruccion.identificador);
+    valor.valor--;
     tablaDeSimbolos.actualizar(instruccion.identificador, valor);
+    return { tipo: valor.tipo, valor: valor.valor }
 }
 
 module.exports = analizar;
