@@ -240,6 +240,7 @@ expresion
 	| expresion OR expresion 						{ $$ = instrucciones.nuevaOperacionBinaria($1, $3, TIPO_OPERACION.OR); }
 	| expresion XOR expresion 						{ $$ = instrucciones.nuevaOperacionBinaria($1, $3, TIPO_OPERACION.XOR); }
     | NOT expresion 								{ $$ = instrucciones.nuevaOperacionUnaria($2, TIPO_OPERACION.NOT); }
+	| TYPEOF PAR_ABRE expresion PAR_CIERRA 			{ $$ = instrucciones.nuevoTypeof($3); }
 	//Incremento y Decremento - PENDIENTE
 	| incremento  									{ $$ = $1; }
 	| decremento 									{ $$ = $1; }

@@ -70,40 +70,40 @@ function procesarBloque(instrucciones, tablaDeSimbolos) {
         } else if (instruccion.tipo === TIPO_INSTRUCCION.WHILE) {
             // Procesando Instrucción While
             let res = procesarWhile(instruccion, tablaDeSimbolos);
-            if(res!==undefined && (res.breakvar || res.continuevar)) break;
+            if (res !== undefined && (res.breakvar || res.continuevar)) break;
         } else if (instruccion.tipo === TIPO_INSTRUCCION.DOWHILE) {
             // Procesando Instrucción DOWhile
             let res = procesarDoWhile(instruccion, tablaDeSimbolos);
-            if(res!==undefined && (res.breakvar || res.continuevar)) break;
+            if (res !== undefined && (res.breakvar || res.continuevar)) break;
         } else if (instruccion.tipo == TIPO_INSTRUCCION.FOR) {
             // Procesando Instrucción For
             let res = procesarFor(instruccion, tablaDeSimbolos);
-            if(res!==undefined && (res.breakvar || res.continuevar)) break;
+            if (res !== undefined && (res.breakvar || res.continuevar)) break;
         } else if (instruccion.tipo === TIPO_INSTRUCCION.IF) {
             // Procesando Instrucción If
             let res = procesarIf(instruccion, tablaDeSimbolos);
-            if(res!==undefined && (res.breakvar || res.continuevar)) break;
+            if (res !== undefined && (res.breakvar || res.continuevar)) break;
         } else if (instruccion.tipo === TIPO_INSTRUCCION.IF_ELSE) {
             // Procesando Instrucción If Else
             let res = procesarIfElse(instruccion, tablaDeSimbolos);
-            if(res!==undefined && (res.breakvar || res.continuevar)) break;
+            if (res !== undefined && (res.breakvar || res.continuevar)) break;
         } else if (instruccion.tipo === TIPO_INSTRUCCION.ELSE_IF) {
             // Procesando Instrucción Else If
             let res = procesarElseIf(instruccion, tablaDeSimbolos);
-            if(res!==undefined && (res.breakvar || res.continuevar)) break;
+            if (res !== undefined && (res.breakvar || res.continuevar)) break;
         } else if (instruccion.tipo === TIPO_INSTRUCCION.SWITCH) {
             // Procesando Instrucción Switch  
             let res = procesarSwitch(instruccion, tablaDeSimbolos);
-            if(res!==undefined && (res.breakvar || res.continuevar)) break;
+            if (res !== undefined && (res.breakvar || res.continuevar)) break;
         } else if (instruccion.tipo === TIPO_INSTRUCCION.EJECUTAR_METODO) {
             // Ejecutando Metodos  
             salida += procesarEjecutarMetodo(instruccion, tablaDeSimbolos);
         } else if (instruccion.tipo === TIPO_INSTRUCCION.BREAK) {
             breakvar = true
-            return { breakvar:breakvar, continuevar:continuevar }
+            return { breakvar: breakvar, continuevar: continuevar }
         } else if (instruccion.tipo === TIPO_INSTRUCCION.CONTINUE) {
             continuevar = true
-            return { breakvar:breakvar, continuevar:continuevar }
+            return { breakvar: breakvar, continuevar: continuevar }
         } else {
             return { valor: 'ERROR: tipo de instrucción no válido: ' + instruccion + "\n", tipo: "ERROR SEMANTICO" };
         }
@@ -340,6 +340,9 @@ function procesarExpresion(expresion, tablaDeSimbolos) {
     } else if (expresion.tipo === TIPO_OPERACION.DECREMENTO_PRE) {
         if (expresion.identificador.valor != undefined) expresion.identificador = expresion.identificador.valor;
         return procesarDecrementoPre(expresion, tablaDeSimbolos);
+    } else if (expresion.tipo === TIPO_OPERACION.TYPEOF) {
+        let res = procesarExpresion(expresion.expresion, tablaDeSimbolos);
+        return { valor: res.tipo.toLowerCase(), tipo: TIPO_DATO.CADENA }
     } else {
         return { valor: 'ERROR: expresión no válida: ' + expresion + "\n", tipo: "ERROR SEMANTICO" };
     }
@@ -427,7 +430,7 @@ function procesarFor(instruccion, tablaDeSimbolos) {
         //let copiaArray = tsLocal.simbolos.slice();
         //const tsFor = new TS(copiaArray/*, tablaDeSimbolos.metodos*/);
         var res = procesarBloque(instruccion.instrucciones, tsFor);
-        if(res.breakvar) break;
+        if (res.breakvar) break;
         //if(res.continuevar) console.log("Continue");
         if (instruccion.aumento.tipo !== TIPO_INSTRUCCION.ASIGNACION) procesarExpresion(instruccion.aumento, tsFor);
         else procesarAsignacion(instruccion.aumento, tsFor);
@@ -480,20 +483,20 @@ function procesarSwitch(instruccion, tablaDeSimbolos) {
     instruccion.casos.forEach(caso => {
         if (caso.tipo == TIPO_OPCION_SWITCH.CASE) {
             const valorExpCase = procesarExpresion(caso.expresion, tsSwitch);
-            if (valorExpCase.valor == valorExpresion.valor || sinbreak ) {
+            if (valorExpCase.valor == valorExpresion.valor || sinbreak) {
                 var res = procesarBloque(caso.instrucciones, tsSwitch);
                 match = true;
-                if (res!=undefined && !res.breakvar) sinbreak = true;
+                if (res != undefined && !res.breakvar) sinbreak = true;
             }
         }
         else {
             def = caso;
-            if(sinbreak)procesarBloque(def.instrucciones, tsSwitch); //Pendiente de eliminar o dejar
+            if (sinbreak) procesarBloque(def.instrucciones, tsSwitch); //Pendiente de eliminar o dejar
         }
-    
+
     });
     if (!match) procesarBloque(def.instrucciones, tsSwitch);
-    
+
 }
 
 module.exports = analizar;

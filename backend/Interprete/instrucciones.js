@@ -31,7 +31,9 @@ const TIPO_OPERACION = {
 	INCREMENTO_POST: 'OP_INCREMENTO_POST',
 	INCREMENTO_PRE: 'OP_INCREMENTO_PRE',
 	DECREMENTO_POST: 'OP_DECREMENTO_POST',
-	DECREMENTO_PRE: 'OP_DECREMENTO_PRE'
+	DECREMENTO_PRE: 'OP_DECREMENTO_PRE',
+
+	TYPEOF: "OP_TYPEOF"
 };
 
 const TIPO_INSTRUCCION = {
@@ -232,6 +234,11 @@ const instrucciones = {
 
 	nuevoContinue: () => ({
 		tipo: TIPO_INSTRUCCION.CONTINUE,
+	}),
+	
+	nuevoTypeof: (expresion) => ({
+		tipo: TIPO_OPERACION.TYPEOF,
+		expresion: expresion
 	})
 }
 
