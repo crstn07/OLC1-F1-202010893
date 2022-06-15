@@ -26,7 +26,7 @@ const TIPO_OPERACION = {
 	AND: 'OP_AND',
 	OR: 'OP_OR',
 	NOT: 'OP_NOT',
-    XOR: 'OP_XOR',
+	XOR: 'OP_XOR',
 
 	INCREMENTO_POST: 'OP_INCREMENTO_POST',
 	INCREMENTO_PRE: 'OP_INCREMENTO_PRE',
@@ -40,15 +40,17 @@ const TIPO_INSTRUCCION = {
 	WHILE: 'INSTR_WHILE',
 	DECLARACION: 'INSTR_DECLARACION',
 	ASIGNACION: 'INSTR_ASIGNACION',
-	DECLARACION_ASIGNACION:'INSTR_DECLARACION_ASIGNACION',
+	DECLARACION_ASIGNACION: 'INSTR_DECLARACION_ASIGNACION',
 	IF: 'INSTR_IF',
 	IF_ELSE: 'INSTR_IF_ELSE',
 	ELSE_IF: 'INSTR_ELSE_IF',
 	FOR: 'INSTR_FOR',
 	SWITCH: 'INSTR_SWITCH',
 	DOWHILE: 'INSTR_DOWHILE',
+	BREAK: 'INSTR_BREAK',
+	CONTINUE: 'INSTR_CONTINUE',
 	DECLARAR_METODO: 'INSTR_DECLAR_METODO',
-	EJECUTAR_METODO:  'INSTR_EJECUTAR_METODO'
+	EJECUTAR_METODO: 'INSTR_EJECUTAR_METODO'
 }
 
 const TIPO_OPCION_SWITCH = {
@@ -68,7 +70,7 @@ const instrucciones = {
 
 	nuevaOperacionBinaria: function (operandoIzq, operandoDer, tipo) {
 		return nuevaOperacion(operandoIzq, operandoDer, tipo);
-	}, 
+	},
 
 	nuevaOperacionUnaria: function (operando, tipo) {
 		return nuevaOperacion(operando, undefined, tipo);
@@ -90,22 +92,22 @@ const instrucciones = {
 		tipo: TIPO_INSTRUCCION.PRINTLN,
 		expresion: expresion
 	}),
-	
+
 	nuevoIncrementoPost: (identificador) => ({
 		tipo: TIPO_OPERACION.INCREMENTO_POST,
 		identificador: identificador
 	}),
-	
+
 	nuevoIncrementoPre: (identificador) => ({
 		tipo: TIPO_OPERACION.INCREMENTO_PRE,
 		identificador: identificador
 	}),
-	
+
 	nuevoDecrementoPost: (identificador) => ({
 		tipo: TIPO_OPERACION.DECREMENTO_POST,
 		identificador: identificador
-	}),	
-	
+	}),
+
 	nuevoDecrementoPre: (identificador) => ({
 		tipo: TIPO_OPERACION.DECREMENTO_PRE,
 		identificador: identificador
@@ -119,7 +121,7 @@ const instrucciones = {
 		};
 	},
 
-	 nuevoDoWhile: function (instrucciones, expresion) {
+	nuevoDoWhile: function (instrucciones, expresion) {
 		return {
 			tipo: TIPO_INSTRUCCION.DOWHILE,
 			expresion: expresion,
@@ -154,15 +156,15 @@ const instrucciones = {
 		}
 	},
 
-   nuevaDeclaracionAsignacion: function (identificador, expresion, tipo_dato, tipoVariable) {
-	   return {
-		   tipo: TIPO_INSTRUCCION.DECLARACION_ASIGNACION,
-		   identificador: identificador,
-		   expresion: expresion,
-		   tipo_dato: tipo_dato,
-		   tipoVar: tipoVariable
-	   }
-   },
+	nuevaDeclaracionAsignacion: function (identificador, expresion, tipo_dato, tipoVariable) {
+		return {
+			tipo: TIPO_INSTRUCCION.DECLARACION_ASIGNACION,
+			identificador: identificador,
+			expresion: expresion,
+			tipo_dato: tipo_dato,
+			tipoVar: tipoVariable
+		}
+	},
 
 	nuevoIf: function (expresion, instrucciones) {
 		return {
@@ -183,7 +185,7 @@ const instrucciones = {
 	},
 
 	//Else-If
-	 nuevoElseIf: function (expresion, instruccionesIf, If) {
+	nuevoElseIf: function (expresion, instruccionesIf, If) {
 		return {
 			tipo: TIPO_INSTRUCCION.ELSE_IF,
 			expresion: expresion,
@@ -200,7 +202,7 @@ const instrucciones = {
 		}
 	},
 
-    //casos Switch
+	//casos Switch
 	nuevoListaCasos: function (caso) {
 		var casos = [];
 		casos.push(caso);
@@ -223,6 +225,14 @@ const instrucciones = {
 			instrucciones: instrucciones
 		}
 	},
+
+	nuevoBreak: () => ({
+		tipo: TIPO_INSTRUCCION.BREAK,
+	}),
+
+	nuevoContinue: () => ({
+		tipo: TIPO_INSTRUCCION.CONTINUE,
+	})
 }
 
 module.exports.TIPO_OPERACION = TIPO_OPERACION;

@@ -125,6 +125,8 @@ instruccion
 	| DO LLAVE_ABRE instrucciones LLAVE_CIERRA WHILE PAR_ABRE expresion PAR_CIERRA PTCOMA { $$ = instrucciones.nuevoDoWhile($3, $7); }	
 	| FOR PAR_ABRE declaracion_asignacion expresion PTCOMA asignacion PAR_CIERRA statement 
 		{ $$ = instrucciones.nuevoFor($3,$4,$6,$8) } 
+	| break
+	| continue
 	| VOID IDENTIFICADOR params statement 		{ $$ = instrucciones.nuevoMetodo($2,$3,$4);}
 	| CALL IDENTIFICADOR PAR_ABRE identificadores PAR_CIERRA PTCOMA { $$ = instrucciones.ejecutarMetodo($2,$4);}
 	| CALL IDENTIFICADOR PAR_ABRE PAR_CIERRA PTCOMA				   { $$ = instrucciones.ejecutarMetodo($2,[]);}
@@ -174,6 +176,15 @@ casos
 caso 
 	: CASE expresion DOSPTS instrucciones { $$ = instrucciones.nuevoCaso($2,$4); }
 	| DEFAULT DOSPTS instrucciones { $$ = instrucciones.nuevoCasoDef($3); }
+;
+
+break
+	: BREAK PTCOMA { $$ = instrucciones.nuevoBreak()}
+	| {}
+;
+continue
+	: CONTINUE PTCOMA { $$ = instrucciones.nuevoContinue()}
+	| {}
 ;
 // DECLARACION Y ASIGNACION
 declaracion_asignacion

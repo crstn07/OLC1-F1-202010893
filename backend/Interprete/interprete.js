@@ -37,8 +37,9 @@ function analizar(entrada) {
 // Recorre las instrucciones en un bloque, las identifica y las procesa
 
 function procesarBloque(instrucciones, tablaDeSimbolos) {
-
-    instrucciones.forEach(instruccion => {
+    breakvar = false;
+    continuevar = false;
+    for (const instruccion of instrucciones) {
         if (instruccion.tipo === TIPO_INSTRUCCION.PRINT) {
             // Procesando Instrucción Print
             salida += procesarPrint(instruccion, tablaDeSimbolos);
@@ -68,33 +69,47 @@ function procesarBloque(instrucciones, tablaDeSimbolos) {
             procesarDecrementoPre(instruccion, tablaDeSimbolos);
         } else if (instruccion.tipo === TIPO_INSTRUCCION.WHILE) {
             // Procesando Instrucción While
-            procesarWhile(instruccion, tablaDeSimbolos);
+            let res = procesarWhile(instruccion, tablaDeSimbolos);
+            if(res!==undefined && (res.breakvar || res.continuevar)) break;
         } else if (instruccion.tipo === TIPO_INSTRUCCION.DOWHILE) {
             // Procesando Instrucción DOWhile
-            procesarDoWhile(instruccion, tablaDeSimbolos);
+            let res = procesarDoWhile(instruccion, tablaDeSimbolos);
+            if(res!==undefined && (res.breakvar || res.continuevar)) break;
         } else if (instruccion.tipo == TIPO_INSTRUCCION.FOR) {
             // Procesando Instrucción For
-            procesarFor(instruccion, tablaDeSimbolos);
+            let res = procesarFor(instruccion, tablaDeSimbolos);
+            if(res!==undefined && (res.breakvar || res.continuevar)) break;
         } else if (instruccion.tipo === TIPO_INSTRUCCION.IF) {
             // Procesando Instrucción If
-            procesarIf(instruccion, tablaDeSimbolos);
+            let res = procesarIf(instruccion, tablaDeSimbolos);
+            if(res!==undefined && (res.breakvar || res.continuevar)) break;
         } else if (instruccion.tipo === TIPO_INSTRUCCION.IF_ELSE) {
             // Procesando Instrucción If Else
-            procesarIfElse(instruccion, tablaDeSimbolos);
+            let res = procesarIfElse(instruccion, tablaDeSimbolos);
+            if(res!==undefined && (res.breakvar || res.continuevar)) break;
         } else if (instruccion.tipo === TIPO_INSTRUCCION.ELSE_IF) {
             // Procesando Instrucción Else If
-            procesarElseIf(instruccion, tablaDeSimbolos);
+            let res = procesarElseIf(instruccion, tablaDeSimbolos);
+            if(res!==undefined && (res.breakvar || res.continuevar)) break;
         } else if (instruccion.tipo === TIPO_INSTRUCCION.SWITCH) {
             // Procesando Instrucción Switch  
-            procesarSwitch(instruccion, tablaDeSimbolos);
+            let res = procesarSwitch(instruccion, tablaDeSimbolos);
+            if(res!==undefined && (res.breakvar || res.continuevar)) break;
         } else if (instruccion.tipo === TIPO_INSTRUCCION.EJECUTAR_METODO) {
             // Ejecutando Metodos  
             salida += procesarEjecutarMetodo(instruccion, tablaDeSimbolos);
+        } else if (instruccion.tipo === TIPO_INSTRUCCION.BREAK) {
+            breakvar = true
+            return { breakvar:breakvar, continuevar:continuevar }
+        } else if (instruccion.tipo === TIPO_INSTRUCCION.CONTINUE) {
+            continuevar = true
+            return { breakvar:breakvar, continuevar:continuevar }
         } else {
             return { valor: 'ERROR: tipo de instrucción no válido: ' + instruccion + "\n", tipo: "ERROR SEMANTICO" };
         }
-    });
-    return { instrucciones: instrucciones, ts: tablaDeSimbolos, salida: salida }
+    };
+    //return { instrucciones: instrucciones, ts: tablaDeSimbolos, salida: salida }
+    return { breakvar, continuevar }
 }
 
 function procesarExpresion(expresion, tablaDeSimbolos) {
@@ -105,7 +120,6 @@ function procesarExpresion(expresion, tablaDeSimbolos) {
             return { valor: res, tipo: valor.tipo };
         } else {
             return { valor: '>>Error Semántico: ' + valor.tipo + ' no puede negarse' + "\n", tipo: "ERROR SEMANTICO" };
-            throw '>>Error Semántico: ' + valor.tipo + ' no puede negarse';
         }
     } else if (expresion.tipo === TIPO_OPERACION.SUMA
         || expresion.tipo === TIPO_OPERACION.RESTA
@@ -387,7 +401,7 @@ function procesarWhile(instruccion, tablaDeSimbolos) {
     while (procesarExpresion(instruccion.expresion, tablaDeSimbolos).valor) {
         let copiaArray = tablaDeSimbolos.simbolos.slice();
         const tsWhile = new TS(copiaArray/*, tablaDeSimbolos.metodos*/);
-        procesarBloque(instruccion.instrucciones, tsWhile);
+        if (procesarBloque(instruccion.instrucciones, tsWhile).breakvar) break;
     }
 }
 
@@ -395,7 +409,7 @@ function procesarDoWhile(instruccion, tablaDeSimbolos) {
     do {
         let copiaArray = tablaDeSimbolos.simbolos.slice();
         const tsDoWhile = new TS(copiaArray/*, tablaDeSimbolos.metodos*/);
-        procesarBloque(instruccion.instrucciones, tsDoWhile);
+        if (procesarBloque(instruccion.instrucciones, tsDoWhile).breakvar) break;
     } while (procesarExpresion(instruccion.expresion, tablaDeSimbolos).valor);
 }
 
@@ -412,7 +426,9 @@ function procesarFor(instruccion, tablaDeSimbolos) {
     while (procesarExpresion(instruccion.expresion, tsFor).valor) {
         //let copiaArray = tsLocal.simbolos.slice();
         //const tsFor = new TS(copiaArray/*, tablaDeSimbolos.metodos*/);
-        procesarBloque(instruccion.instrucciones, tsFor);
+        var res = procesarBloque(instruccion.instrucciones, tsFor);
+        if(res.breakvar) break;
+        //if(res.continuevar) console.log("Continue");
         if (instruccion.aumento.tipo !== TIPO_INSTRUCCION.ASIGNACION) procesarExpresion(instruccion.aumento, tsFor);
         else procesarAsignacion(instruccion.aumento, tsFor);
     }
@@ -425,7 +441,7 @@ function procesarIf(instruccion, tablaDeSimbolos) {
     if (condicion.valor) {
         let copiaArray = tablaDeSimbolos.simbolos.slice();
         const /*Eliminar el Const si no funciona*/tsIf = new TS(copiaArray/*, tablaDeSimbolos.metodos*/);
-        procesarBloque(instruccion.instrucciones, tsIf);
+        return procesarBloque(instruccion.instrucciones, tsIf);
     }
 }
 
@@ -434,11 +450,11 @@ function procesarIfElse(instruccion, tablaDeSimbolos) {
     if (condicion.valor) {
         let copiaArray = tablaDeSimbolos.simbolos.slice();
         const tsIf = new TS(copiaArray/*, tablaDeSimbolos.metodos*/);
-        procesarBloque(instruccion.instruccionesIfVerdadero, tsIf);
+        return procesarBloque(instruccion.instruccionesIfVerdadero, tsIf);
     } else {
         let copiaArray = tablaDeSimbolos.simbolos.slice();
         const tsElse = new TS(copiaArray/*, tablaDeSimbolos.metodos*/);;
-        procesarBloque(instruccion.instruccionesIfFalso, tsElse);
+        return procesarBloque(instruccion.instruccionesIfFalso, tsElse);
     }
 }
 
@@ -447,33 +463,37 @@ function procesarElseIf(instruccion, tablaDeSimbolos) {
     if (condicion.valor) {
         let copiaArray = tablaDeSimbolos.simbolos.slice();
         const tsIf = new TS(copiaArray/*, tablaDeSimbolos.metodos*/);
-        procesarBloque(instruccion.instruccionesIf, tsIf);
+        return procesarBloque(instruccion.instruccionesIf, tsIf);
     } else {
-        if (instruccion.if.tipo === TIPO_INSTRUCCION.IF_ELSE) procesarIfElse(instruccion.if, tablaDeSimbolos);
-        if (instruccion.if.tipo === TIPO_INSTRUCCION.IF) procesarIf(instruccion.if, tablaDeSimbolos);
-        if (instruccion.if.tipo === TIPO_INSTRUCCION.ELSE_IF) procesarElseIf(instruccion.if, tablaDeSimbolos);
+        if (instruccion.if.tipo === TIPO_INSTRUCCION.IF_ELSE) return procesarIfElse(instruccion.if, tablaDeSimbolos);
+        if (instruccion.if.tipo === TIPO_INSTRUCCION.IF) return procesarIf(instruccion.if, tablaDeSimbolos);
+        if (instruccion.if.tipo === TIPO_INSTRUCCION.ELSE_IF) return procesarElseIf(instruccion.if, tablaDeSimbolos);
     }
 }
 
 function procesarSwitch(instruccion, tablaDeSimbolos) {
     let match = false;
-    var def;
+    let def; let sinbreak = false;
     const valorExpresion = procesarExpresion(instruccion.expresion, tablaDeSimbolos);
     let copiaArray = tablaDeSimbolos.simbolos.slice();
     const tsSwitch = new TS(copiaArray/*, tablaDeSimbolos.metodos*/);
     instruccion.casos.forEach(caso => {
         if (caso.tipo == TIPO_OPCION_SWITCH.CASE) {
             const valorExpCase = procesarExpresion(caso.expresion, tsSwitch);
-            if (valorExpCase.valor == valorExpresion.valor) {
-                procesarBloque(caso.instrucciones, tsSwitch);
+            if (valorExpCase.valor == valorExpresion.valor || sinbreak ) {
+                var res = procesarBloque(caso.instrucciones, tsSwitch);
                 match = true;
+                if (res!=undefined && !res.breakvar) sinbreak = true;
             }
         }
         else {
             def = caso;
+            if(sinbreak)procesarBloque(def.instrucciones, tsSwitch); //Pendiente de eliminar o dejar
         }
+    
     });
     if (!match) procesarBloque(def.instrucciones, tsSwitch);
+    
 }
 
 module.exports = analizar;
