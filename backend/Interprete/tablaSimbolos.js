@@ -45,31 +45,57 @@ function crearSimbolo(id, tipo, valor, tipoVar) {
 
 }
 
-/*function crearMetodo(id, parametros, instrucciones) {
+function crearMetodo(id, parametros, instrucciones) {
     return {
         id: id,
         parametros: parametros,
         instrucciones: instrucciones
     }
 }
-*/
+
 class TS {
 
-    constructor(simbolos/*, metodos*/) {
+    constructor(simbolos, metodos) {
         this._simbolos = simbolos;
-        //this._metodos = metodos;
+        this._metodos = metodos;
     }
-    /*
-         agregarMetodo(id, parametros, instrucciones ) {
-            const metodo = this._metodos.filter(metodo => metodo.id === id.toLowerCase())[0];
-            if (!metodo) {
+
+    agregarMetodo(id, parametros, instrucciones) {
+        //const metodo = this._metodos.filter(metodo => metodo.id === id.toLowerCase())[0];
+        const metodos = this._metodos.filter(metodo => metodo.id === id.toLowerCase());
+        for (const metodo of metodos) {
+            let params1 = metodo.parametros.map(parametro => parametro.tipo);
+            let params2 = parametros.map(parametro => parametro.tipo);
+            console.log("MAP1: ", params1)
+            console.log("MAP2: ", params2)
+            console.log(JSON.stringify(params1) !== JSON.stringify(params2))
+            if (JSON.stringify(params1) !== JSON.stringify(params2)) {
+                // NO es el mismo metodo
+                //console.log("NO ES EL MISMO METODO")
                 const nuevoMetodo = crearMetodo(id.toLowerCase(), parametros, instrucciones);
                 if (nuevoMetodo !== undefined) this._metodos.push(nuevoMetodo);
             } else {
+                // ES el mismo metodo
+                //console.log("ES EL MISMO METODO")
                 console.error('>>Error Sémantico: el metodo "' + id.toLowerCase() + '" ya fue declarado')
             }
+
+
         }
-    */
+        if (!metodos[0]) {
+            const nuevoMetodo = crearMetodo(id.toLowerCase(), parametros, instrucciones);
+            if (nuevoMetodo !== undefined) this._metodos.push(nuevoMetodo);
+        }
+
+
+        /*         if (!metodo) {
+                    const nuevoMetodo = crearMetodo(id.toLowerCase(), parametros, instrucciones);
+                    if (nuevoMetodo !== undefined) this._metodos.push(nuevoMetodo);
+                } else {
+                    console.error('>>Error Sémantico: el metodo "' + id.toLowerCase() + '" ya fue declarado')
+                }  */
+    }
+
 
     agregar(id, tipo, valor, tipoVar) {
         //if (Array.isArray(id)) {
@@ -119,23 +145,23 @@ class TS {
         console.error('ERROR: la variable ' + id + ' no ha sido declarada')
     }
 
-    /*
-         obtenerMetodo(id) {
-            id = id.toLowerCase();
-            const metodo = this._metodos.filter(metodo => metodo.id === id)[0];
-            if (metodo) return metodo; 
-            console.error('ERROR: el metodo ' + id + ' no ha sido declarado')// throw 'ERROR: metodo: ' + id + ' no ha sido definido';
-        }
-    */
+
+    obtenerMetodo(id) {
+        id = id.toLowerCase();
+        const metodo = this._metodos.filter(metodo => metodo.id === id)[0];
+        if (metodo) return metodo;
+        console.error('ERROR: el metodo ' + id + ' no ha sido declarado')// throw 'ERROR: metodo: ' + id + ' no ha sido definido';
+    }
+
 
     get simbolos() {
         return this._simbolos;
     }
-    /*
-        get metodos(){
-            return this._metodos;
-        }
-    */
+
+    get metodos() {
+        return this._metodos;
+    }
+
 }
 
 module.exports.TIPO_DATO = TIPO_DATO;

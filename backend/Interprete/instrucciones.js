@@ -51,7 +51,7 @@ const TIPO_INSTRUCCION = {
 	DOWHILE: 'INSTR_DOWHILE',
 	BREAK: 'INSTR_BREAK',
 	CONTINUE: 'INSTR_CONTINUE',
-	DECLARAR_METODO: 'INSTR_DECLAR_METODO',
+	DECLARAR_METODO: 'INSTR_DECLARAR_METODO',
 	EJECUTAR_METODO: 'INSTR_EJECUTAR_METODO'
 }
 
@@ -239,7 +239,21 @@ const instrucciones = {
 	nuevoTypeof: (expresion) => ({
 		tipo: TIPO_OPERACION.TYPEOF,
 		expresion: expresion
-	})
+	}),
+
+	nuevoMetodo: (id, parametros, instrucciones) => ({
+		tipo: TIPO_INSTRUCCION.DECLARAR_METODO,
+		identificador: id,
+		parametros: parametros,
+		instrucciones:instrucciones
+		
+	}),
+
+	ejecutarMetodo: (id, parametros) => ({
+		tipo: TIPO_INSTRUCCION.EJECUTAR_METODO,
+		identificador: id,
+		parametrosAsignar: parametros
+	}),
 }
 
 module.exports.TIPO_OPERACION = TIPO_OPERACION;

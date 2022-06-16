@@ -128,8 +128,8 @@ instruccion
 	| break
 	| continue
 	| VOID IDENTIFICADOR params statement 		{ $$ = instrucciones.nuevoMetodo($2,$3,$4);}
-	| CALL IDENTIFICADOR PAR_ABRE identificadores PAR_CIERRA PTCOMA { $$ = instrucciones.ejecutarMetodo($2,$4);}
-	| CALL IDENTIFICADOR PAR_ABRE PAR_CIERRA PTCOMA				   { $$ = instrucciones.ejecutarMetodo($2,[]);}
+	| CALL IDENTIFICADOR PAR_ABRE parametros_asignar PAR_CIERRA PTCOMA { $$ = instrucciones.ejecutarMetodo($2,$4);}
+	//| CALL IDENTIFICADOR PAR_ABRE PAR_CIERRA PTCOMA				   { $$ = instrucciones.ejecutarMetodo($2,[]);}
 	| error { console.error('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column); }
 ;
 
@@ -144,7 +144,11 @@ params
 parametros
 	: parametros COMA tipo IDENTIFICADOR		{ $1.push({tipo:$3,identificador:$4}); $$=$1; }
 	| tipo IDENTIFICADOR						{ $$ = [{tipo:$1,identificador:$2}]; }
-
+;
+parametros_asignar
+	: parametros_asignar COMA expresion		{ $1.push($3); $$=$1; }
+	| expresion								{ $$ = [$1]; }
+	| 										{ $$ = []; }
 ;
 tipo
 	: INT 		{ $$ = 'INT'; }
