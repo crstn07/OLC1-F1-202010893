@@ -52,7 +52,8 @@ const TIPO_INSTRUCCION = {
 	BREAK: 'INSTR_BREAK',
 	CONTINUE: 'INSTR_CONTINUE',
 	DECLARAR_METODO: 'INSTR_DECLARAR_METODO',
-	EJECUTAR_METODO: 'INSTR_EJECUTAR_METODO'
+	EJECUTAR_METODO: 'INSTR_EJECUTAR_METODO',
+	RETURN: 'INSTR_RETURN',
 }
 
 const TIPO_OPCION_SWITCH = {
@@ -235,18 +236,23 @@ const instrucciones = {
 	nuevoContinue: () => ({
 		tipo: TIPO_INSTRUCCION.CONTINUE,
 	}),
+
+	nuevoReturn: (expresion) => ({
+		tipo: TIPO_INSTRUCCION.RETURN,
+		expresion: expresion
+	}),
 	
 	nuevoTypeof: (expresion) => ({
 		tipo: TIPO_OPERACION.TYPEOF,
 		expresion: expresion
 	}),
 
-	nuevoMetodo: (id, parametros, instrucciones) => ({
+	nuevoMetodo: (tipoReturn, id, parametros, instrucciones) => ({
 		tipo: TIPO_INSTRUCCION.DECLARAR_METODO,
 		identificador: id,
 		parametros: parametros,
-		instrucciones:instrucciones
-		
+		instrucciones:instrucciones, 
+		tipoReturn: tipoReturn
 	}),
 
 	ejecutarMetodo: (id, parametros) => ({
@@ -254,6 +260,7 @@ const instrucciones = {
 		identificador: id,
 		parametrosAsignar: parametros
 	}),
+	
 }
 
 module.exports.TIPO_OPERACION = TIPO_OPERACION;

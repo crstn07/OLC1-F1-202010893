@@ -127,9 +127,10 @@ instruccion
 		{ $$ = instrucciones.nuevoFor($3,$4,$6,$8) } 
 	| break
 	| continue
-	| VOID IDENTIFICADOR params statement 		{ $$ = instrucciones.nuevoMetodo($2,$3,$4);}
+	| return
+	| VOID IDENTIFICADOR params statement 		{ $$ = instrucciones.nuevoMetodo("VOID",$2,$3,$4);}
+	| tipo IDENTIFICADOR params statement 		{ $$ = instrucciones.nuevoMetodo($1,$2,$3,$4);}
 	| CALL IDENTIFICADOR PAR_ABRE parametros_asignar PAR_CIERRA PTCOMA { $$ = instrucciones.ejecutarMetodo($2,$4);}
-	//| CALL IDENTIFICADOR PAR_ABRE PAR_CIERRA PTCOMA				   { $$ = instrucciones.ejecutarMetodo($2,[]);}
 	| error { console.error('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column); }
 ;
 
@@ -188,6 +189,11 @@ break
 ;
 continue
 	: CONTINUE PTCOMA { $$ = instrucciones.nuevoContinue()}
+	| {}
+;
+return
+	: RETURN PTCOMA { $$ = instrucciones.nuevoReturn(); }
+	| RETURN expresion PTCOMA { $$ = instrucciones.nuevoReturn($2); }
 	| {}
 ;
 // DECLARACION Y ASIGNACION
@@ -252,5 +258,6 @@ expresion
 	//| MAS MAS expresion 		{ $$ = instrucciones.nuevoIncrementoPre($3);}
 	//| expresion MENOS MENOS		{ $$ = instrucciones.nuevoDecrementoPost($1);}
 	//| MENOS MENOS expresion		{ $$ = instrucciones.nuevoDecrementoPre($3);}
+	| IDENTIFICADOR PAR_ABRE parametros_asignar PAR_CIERRA { $$ = instrucciones.ejecutarMetodo($1,$3);}
 ;
 

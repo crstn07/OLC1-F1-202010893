@@ -44,6 +44,7 @@ function procesarBloque(instrucciones, tablaDeSimbolos) {
 
     breakvar = false;
     continuevar = false;
+    returnvar = undefined;
     for (const instruccion of instrucciones) {
         if (instruccion.tipo === TIPO_INSTRUCCION.PRINT) {
             // Procesando Instrucción Print
@@ -102,21 +103,29 @@ function procesarBloque(instrucciones, tablaDeSimbolos) {
             if (res !== undefined && (res.breakvar || res.continuevar)) break;
         } else if (instruccion.tipo === TIPO_INSTRUCCION.EJECUTAR_METODO) {
             // Ejecutando Metodos  
+            console.log("SALIDA <<ANTES>> DE EJECUTAR LA INSTRUCCION METODO: \"", salida,"\"")
             procesarEjecutarMetodo(instruccion, tablaDeSimbolos);
+            console.log("SALIDA <<DESPUES>> DE EJECUTAR LA INSTRUCCION METODO: \"",salida,"\"")
         } else if (instruccion.tipo === TIPO_INSTRUCCION.DECLARAR_METODO) {
             // IGNORA LA DECLARACION
         } else if (instruccion.tipo === TIPO_INSTRUCCION.BREAK) {
             breakvar = true
-            return { breakvar: breakvar, continuevar: continuevar }
+            return { breakvar: breakvar, continuevar: continuevar, returnvar: returnvar}
         } else if (instruccion.tipo === TIPO_INSTRUCCION.CONTINUE) {
             continuevar = true
-            return { breakvar: breakvar, continuevar: continuevar }
+            return { breakvar: breakvar, continuevar: continuevar, returnvar: returnvar}
+        } else if (instruccion.tipo === TIPO_INSTRUCCION.RETURN) {
+            if (instruccion.expresion!==undefined) {
+                returnvar = procesarExpresion(instruccion.expresion, tablaDeSimbolos);
+            }
+            return {  breakvar, continuevar, returnvar };
         } else {
             return { valor: 'ERROR: tipo de instrucción no válido: ' + instruccion + "\n", tipo: "ERROR SEMANTICO" };
         }
     };
     //return { instrucciones: instrucciones, ts: tablaDeSimbolos, salida: salida }
-    return { breakvar, continuevar }
+    //console.log("RETURN :" , returnvar)
+    return { breakvar, continuevar, returnvar };
 }
 
 function procesarExpresion(expresion, tablaDeSimbolos) {
@@ -350,6 +359,9 @@ function procesarExpresion(expresion, tablaDeSimbolos) {
     } else if (expresion.tipo === TIPO_OPERACION.TYPEOF) {
         let res = procesarExpresion(expresion.expresion, tablaDeSimbolos);
         return { valor: res.tipo.toLowerCase(), tipo: TIPO_DATO.CADENA }
+    } else if (expresion.tipo === TIPO_INSTRUCCION.EJECUTAR_METODO) { 
+        console.log("SALIDA DESPUES DE DEVOLVER EL RETORNO: \"" + salida + "\"");
+        return  procesarEjecutarMetodo(expresion, tablaDeSimbolos);
     } else {
         return { valor: 'ERROR: expresión no válida: ' + expresion + "\n", tipo: "ERROR SEMANTICO" };
     }
@@ -507,86 +519,79 @@ function procesarSwitch(instruccion, tablaDeSimbolos) {
 }
 
 function procesarDeclararMetodo(instruccion, tablaDeSimbolos) {
-    //console.log(instruccion)
-    tablaDeSimbolos.agregarMetodo(instruccion.identificador, instruccion.parametros, instruccion.instrucciones);
+    //console.log(instruccion.tipoReturn)
+    tablaDeSimbolos.agregarMetodo(instruccion.identificador, instruccion.parametros, instruccion.instrucciones, instruccion.tipoReturn);
 }
 
 function procesarEjecutarMetodo(instruccion, tablaDeSimbolos) {
-    //let metodos = tablaDeSimbolos.metodos;
-    let error = false;
-    //let errorLength = false;
-    //let errorType = false;
     try {
         const metodos = tablaDeSimbolos.metodos.filter(metodo => metodo.id === instruccion.identificador.toLowerCase());
-        console.log("METODOS: ", metodos)
-        let copiaArray = tablaDeSimbolos.simbolos.slice();
-        const tsMetodo = new TS(copiaArray, tablaDeSimbolos.metodos);
-        for (const metodo of metodos) {
-            let params1 = metodo.parametros.map(parametro => parametro.tipo);
-            let params2 = instruccion.parametrosAsignar.map(parametro => procesarExpresion(parametro, tablaDeSimbolos).tipo);
-            console.log("MAP1: ", params1)
-            console.log("MAP2: ", params2)
-            console.log(JSON.stringify(params1) === JSON.stringify(params2))
-            
-            if (JSON.stringify(params1) === JSON.stringify(params2)) {
-                //errorLength = false;
-                //errorType = false;
+        if (metodos.length > 0) {
+            let error = false;
+            //let errorLength = false;
+            //let errorType = false;
+            //console.log("METODOS: ", metodos)
+            let copiaArray = tablaDeSimbolos.simbolos.slice();
+            const tsMetodo = new TS([], tablaDeSimbolos.metodos);
+            for (const metodo of metodos) {
+                let params1 = metodo.parametros.map(parametro => parametro.tipo);
+                let params2 = instruccion.parametrosAsignar.map(parametro => procesarExpresion(parametro, tablaDeSimbolos).tipo);
+                //console.log("MAP1: ", params1)
+                //console.log("MAP2: ", params2)
+                //console.log(JSON.stringify(params1) === JSON.stringify(params2))
 
-                if(params1.length > 0) {
-                for (let i = 0; i < metodo.parametros.length; i++) {
-                    const param = metodo.parametros[i];
-                    const paramAsignar = instruccion.parametrosAsignar[i];
-                    let parametroAsignar = procesarExpresion(paramAsignar, tsMetodo);
-                    //console.log(param.tipo, ",", parametroAsignar.tipo)
-                    //if (param.tipo === parametroAsignar.tipo) {
-                        tsMetodo.agregar([param.identificador], param.tipo, parametroAsignar, "VAR");
-                    //} else {
-                      //  salida += "\n>>Error semántico: los tipos de los parametros no son iguales\n"
-                        error = false;
-                    //}
-                   
-                } 
-                if (!error) procesarBloque(metodo.instrucciones, tsMetodo); break;
-              }
-              else{
-                error=false;
-                procesarBloque(metodo.instrucciones, tsMetodo); break;
-              }
-            } else {
-                //if (params1.length !== params2.length) errorLength = true;
-                //else errorType = true;
-                error = true;
-            } 
-
-           /*  if (metodo.parametros.length === instruccion.parametrosAsignar.length) {
-                let copiaArray = tablaDeSimbolos.simbolos.slice();
-                const tsMetodo = new TS(copiaArray, tablaDeSimbolos.metodos);
-
-                for (let i = 0; i < metodo.parametros.length; i++) {
-                    const param = metodo.parametros[i];
-                    const paramAsignar = instruccion.parametrosAsignar[i];
-                    let parametroAsignar = procesarExpresion(paramAsignar, tsMetodo);
-                    //console.log(param.tipo, ",", parametroAsignar.tipo)
-                    if (param.tipo === parametroAsignar.tipo) {
-                        tsMetodo.agregar([param.identificador], param.tipo, parametroAsignar, "VAR");
-                    } else {
-                        salida += "\n>>Error semántico: los tipos de los parametros no son iguales\n"
-                        error = true;
+                if (JSON.stringify(params1) === JSON.stringify(params2)) {
+                    //errorLength = false;
+                    //errorType = false;
+                    error = false;
+                    if (params1.length > 0) {
+                        for (let i = 0; i < metodo.parametros.length; i++) {
+                            const param = metodo.parametros[i];
+                            const paramAsignar = instruccion.parametrosAsignar[i];
+                            let parametroAsignar = procesarExpresion(paramAsignar, tsMetodo);
+                            tsMetodo.agregar([param.identificador], param.tipo, parametroAsignar, "VAR");
+                        }
                     }
+                    if (metodo.tipoReturn === "VOID") {
+                        let retorno = procesarBloque(metodo.instrucciones, tsMetodo).returnvar;
+                        //console.log("RETORNO DE METODO: " + metodo.id + " = " + JSON.stringify(retorno));
+                        if(retorno !== undefined){
+                            salida += "\n>>Error semántico: Un método no debe tener un valor de retorno \n";
+                        } 
+                        break;
+                    } else {
+                        let retorno = procesarBloque(metodo.instrucciones, tsMetodo).returnvar;
+                        console.log("RETORNO DE METODO: " + metodo.id + " = " + JSON.stringify(retorno));
+                        if(retorno === undefined){
+                            salida += "\n>>Error semántico: Una función debe tener un valor de retorno \n";
+                        } else if (retorno.tipo === metodo.tipoReturn) {
+                            returnvar = undefined;
+                            console.log("SALIDA DESPUES DE EJECUTAR EL METODO: " + metodo.id + " = {"  + salida + "}")
+                            return retorno //{retorno, salida}
+                        } else {
+                            salida += "\n>>Error semántico: El tipo de la expresión de retorno no coincide con el tipo de la función:  \"" + metodo.id + "\"\n";
+                            returnvar = undefined;
+                            return {valor: undefined , tipo: "STRING"}
+                        }
+                        break;
+                    }
+                } else {
+                    //if (params1.length !== params2.length) errorLength = true;
+                    //else errorType = true;
+                    error = true;
                 }
-                if (!error) procesarBloque(metodo.instrucciones, tsMetodo);
-            } else {
-                salida += "\n>>Error Sémantico: la cantidad de parametros a asignar no es la misma que los parametros definidos\n"
-            } */
+            }
+            if (error) salida += "\n>>Error semántico: problemas con los parámetros del método: \"" + metodos[0].id + "\"\n";
+            //if (errorLength) salida += "\n>>Error Sémantico: la cantidad de parámetros a asignar del método: \"" + metodos[0].id + "\" no es la misma que la de los parametros declarados\n";
+            //if(errorType) salida += "\n>>Error semántico: los tipos de los parámetros del método: \"" + metodos[0].id + "\" no coinciden \n";
 
+        } else {
+            salida += "\n>>Error semántico: no existe el método: \"" + instruccion.identificador.toLowerCase() + "\"\n";
         }
-        if (error) salida += "\n>>Error semántico: problemas con los parámetros del método: \"" + metodos[0].id + "\"\n";
-        //if (errorLength) salida += "\n>>Error Sémantico: la cantidad de parámetros a asignar del método: \"" + metodos[0].id + "\" no es la misma que la de los parametros declarados\n";
-        //if(errorType) salida += "\n>>Error semántico: los tipos de los parámetros del método: \"" + metodos[0].id + "\" no coinciden \n";
 
     } catch (error) {
         console.log(error)
-        salida += "\n>>Ocurrió un error al ejecutar el metodo" + metodo.identificador + "\n"
+        salida += "\n>>Ocurrió un error al ejecutar el metodo" + metodo.identificador.toLowerCase() + "\n"
     }
 }
 
