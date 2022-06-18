@@ -49,15 +49,16 @@ function crearMetodo(id, parametros, instrucciones, tipoReturn) {
     return {
         id: id,
         parametros: parametros,
-        instrucciones: instrucciones, 
+        instrucciones: instrucciones,
         tipoReturn: tipoReturn
     }
 }
 
 class TS {
 
-    constructor(simbolos, metodos) {
-        this._simbolos = simbolos;
+    constructor(anterior, metodos) {
+        this.anterior = anterior;
+        this._simbolos = new Array();
         this._metodos = metodos;
     }
 
@@ -123,7 +124,13 @@ class TS {
             }
         }
         else {
-            console.error('ERROR: la variable ' + id + ' no ha sido declarada')
+            if (this.anterior !== undefined) {
+                this.anterior.actualizar(id, valor)
+            }
+            else {
+                console.error('ERROR: la variable ' + id + ' no ha sido declarada')
+                //return undefined;
+            }
         }
     }
 
@@ -131,17 +138,39 @@ class TS {
         id = id.toLowerCase();
         const simbolo = this._simbolos.filter(simbolo => simbolo.id === id)[0];
 
-        if (simbolo) return simbolo;
-        console.error('ERROR: la variable ' + id + ' no ha sido declarada')
+        if (simbolo) { return simbolo; }
+        else {
+            /*             do {
+                            res = anterior.obtener(id)
+                            if(res!==undefined) { return res; }
+                        } while (anterior !== undefined); */
+            if (this.anterior !== undefined) {
+                return this.anterior.obtener(id)
+            }
+            else {
+                console.error('ERROR: la variable ' + id + ' no ha sido declarada')
+                //return undefined;
+            }
+        }
     }
 
 
-    obtenerMetodo(id) {
+    /* obtenerMetodo(id) {
         id = id.toLowerCase();
-        const metodo = this._metodos.filter(metodo => metodo.id === id)[0];
-        if (metodo) return metodo;
-        console.error('ERROR: el metodo ' + id + ' no ha sido declarado')// throw 'ERROR: metodo: ' + id + ' no ha sido definido';
-    }
+        //const metodo = this._metodos.filter(metodo => metodo.id === id)[0];
+        const metodos = this._metodos.filter(metodo => metodo.id === id);
+        console.log("METODOS: ", metodos)
+        if (metodos[0]) { return metodos; }
+        else {
+            if (this.anterior !== undefined) {
+                return this.anterior.obtenerMetodo(id);
+            }
+            else {
+                console.error('ERROR: el metodo ' + id + ' no ha sido declarado')
+                return;
+            }
+        }
+    } */
 
 
     get simbolos() {

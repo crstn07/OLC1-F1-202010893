@@ -25,7 +25,7 @@ function analizar(entrada) {
     }
 
     // Creación de una tabla de simbolos GLOBAL para iniciar con el interprete
-    const tsGlobal = new TS([], []);
+    const tsGlobal = new TS(undefined, []);
 
     // Procesa las instrucciones reconocidas en el AST
     procesarBloque(ast_instrucciones, tsGlobal)
@@ -422,7 +422,7 @@ function procesarDecrementoPre(instruccion, tablaDeSimbolos) {
 function procesarWhile(instruccion, tablaDeSimbolos) {
     while (procesarExpresion(instruccion.expresion, tablaDeSimbolos).valor) {
         let copiaArray = tablaDeSimbolos.simbolos.slice();
-        const tsWhile = new TS(copiaArray, tablaDeSimbolos.metodos);
+        const tsWhile = new TS(tablaDeSimbolos, tablaDeSimbolos.metodos);
         if (procesarBloque(instruccion.instrucciones, tsWhile).breakvar) break;
     }
 }
@@ -430,14 +430,14 @@ function procesarWhile(instruccion, tablaDeSimbolos) {
 function procesarDoWhile(instruccion, tablaDeSimbolos) {
     do {
         let copiaArray = tablaDeSimbolos.simbolos.slice();
-        const tsDoWhile = new TS(copiaArray, tablaDeSimbolos.metodos);
+        const tsDoWhile = new TS(tablaDeSimbolos, tablaDeSimbolos.metodos);
         if (procesarBloque(instruccion.instrucciones, tsDoWhile).breakvar) break;
     } while (procesarExpresion(instruccion.expresion, tablaDeSimbolos).valor);
 }
 
 function procesarFor(instruccion, tablaDeSimbolos) {
     let copiaArray = tablaDeSimbolos.simbolos.slice();
-    const tsFor = new TS(copiaArray, tablaDeSimbolos.metodos);
+    const tsFor = new TS(tablaDeSimbolos, tablaDeSimbolos.metodos);
     if (instruccion.variable.tipo === TIPO_INSTRUCCION.ASIGNACION) {
         //LA VARIABLE YA HA SIDO DECLARADA EN EL AMBITO PADRE Y SE ASIGNA VALOR
         procesarAsignacion(instruccion.variable, tablaDeSimbolos /*Verificar por tsFor*/);
@@ -447,7 +447,7 @@ function procesarFor(instruccion, tablaDeSimbolos) {
     }
     while (procesarExpresion(instruccion.expresion, tsFor).valor) {
         //let copiaArray = tsLocal.simbolos.slice();
-        //const tsFor = new TS(copiaArray, tablaDeSimbolos.metodos);
+        //const tsFor = new TS(tablaDeSimbolos, tablaDeSimbolos.metodos);
         var res = procesarBloque(instruccion.instrucciones, tsFor);
         if (res.breakvar) break;
         //if(res.continuevar) console.log("Continue");
@@ -462,7 +462,7 @@ function procesarIf(instruccion, tablaDeSimbolos) {
     const condicion = procesarExpresion(instruccion.expresion, tablaDeSimbolos);
     if (condicion.valor) {
         let copiaArray = tablaDeSimbolos.simbolos.slice();
-        const /*Eliminar el Const si no funciona*/tsIf = new TS(copiaArray, tablaDeSimbolos.metodos);
+        const /*Eliminar el Const si no funciona*/tsIf = new TS(tablaDeSimbolos, tablaDeSimbolos.metodos);
         return procesarBloque(instruccion.instrucciones, tsIf);
     }
 }
@@ -471,11 +471,11 @@ function procesarIfElse(instruccion, tablaDeSimbolos) {
     const condicion = procesarExpresion(instruccion.expresion, tablaDeSimbolos);
     if (condicion.valor) {
         let copiaArray = tablaDeSimbolos.simbolos.slice();
-        const tsIf = new TS(copiaArray, tablaDeSimbolos.metodos);
+        const tsIf = new TS(tablaDeSimbolos, tablaDeSimbolos.metodos);
         return procesarBloque(instruccion.instruccionesIfVerdadero, tsIf);
     } else {
         let copiaArray = tablaDeSimbolos.simbolos.slice();
-        const tsElse = new TS(copiaArray, tablaDeSimbolos.metodos);;
+        const tsElse = new TS(tablaDeSimbolos, tablaDeSimbolos.metodos);;
         return procesarBloque(instruccion.instruccionesIfFalso, tsElse);
     }
 }
@@ -484,7 +484,7 @@ function procesarElseIf(instruccion, tablaDeSimbolos) {
     const condicion = procesarExpresion(instruccion.expresion, tablaDeSimbolos);
     if (condicion.valor) {
         let copiaArray = tablaDeSimbolos.simbolos.slice();
-        const tsIf = new TS(copiaArray, tablaDeSimbolos.metodos);
+        const tsIf = new TS(tablaDeSimbolos, tablaDeSimbolos.metodos);
         return procesarBloque(instruccion.instruccionesIf, tsIf);
     } else {
         if (instruccion.if.tipo === TIPO_INSTRUCCION.IF_ELSE) return procesarIfElse(instruccion.if, tablaDeSimbolos);
@@ -498,7 +498,7 @@ function procesarSwitch(instruccion, tablaDeSimbolos) {
     let def; let sinbreak = false;
     const valorExpresion = procesarExpresion(instruccion.expresion, tablaDeSimbolos);
     let copiaArray = tablaDeSimbolos.simbolos.slice();
-    const tsSwitch = new TS(copiaArray, tablaDeSimbolos.metodos);
+    const tsSwitch = new TS(tablaDeSimbolos, tablaDeSimbolos.metodos);
     instruccion.casos.forEach(caso => {
         if (caso.tipo == TIPO_OPCION_SWITCH.CASE) {
             const valorExpCase = procesarExpresion(caso.expresion, tsSwitch);
@@ -526,13 +526,13 @@ function procesarDeclararMetodo(instruccion, tablaDeSimbolos) {
 function procesarEjecutarMetodo(instruccion, tablaDeSimbolos) {
     try {
         const metodos = tablaDeSimbolos.metodos.filter(metodo => metodo.id === instruccion.identificador.toLowerCase());
+        //const metodos = tablaDeSimbolos.obtenerMetodo(instruccion.identificador);
         if (metodos.length > 0) {
             let error = false;
             //let errorLength = false;
             //let errorType = false;
-            //console.log("METODOS: ", metodos)
             let copiaArray = tablaDeSimbolos.simbolos.slice();
-            const tsMetodo = new TS([], tablaDeSimbolos.metodos);
+            const tsMetodo = new TS(tablaDeSimbolos, tablaDeSimbolos.metodos);
             for (const metodo of metodos) {
                 let params1 = metodo.parametros.map(parametro => parametro.tipo);
                 let params2 = instruccion.parametrosAsignar.map(parametro => procesarExpresion(parametro, tablaDeSimbolos).tipo);
@@ -567,11 +567,11 @@ function procesarEjecutarMetodo(instruccion, tablaDeSimbolos) {
                         } else if (retorno.tipo === metodo.tipoReturn) {
                             returnvar = undefined;
                             console.log("SALIDA DESPUES DE EJECUTAR EL METODO: " + metodo.id + " = {"  + salida + "}")
-                            return retorno //{retorno, salida}
+                            return retorno; //{retorno, salida}
                         } else {
                             salida += "\n>>Error semántico: El tipo de la expresión de retorno no coincide con el tipo de la función:  \"" + metodo.id + "\"\n";
                             returnvar = undefined;
-                            return {valor: undefined , tipo: "STRING"}
+                            return {valor: undefined , tipo: "STRING"};
                         }
                         break;
                     }
