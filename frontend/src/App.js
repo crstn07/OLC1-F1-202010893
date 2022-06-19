@@ -1,5 +1,6 @@
 import Editor from '@monaco-editor/react';
 import { useRef } from 'react';
+//import { ReactComponent as Logo } from '../backend/AST.svg';
 import './App.css';
 
 function App() {
@@ -25,7 +26,7 @@ function App() {
   }
 
   function guardarArchivo() {
-    let nombreArchivo = 'LFScript'
+    let nombreArchivo = 'LFScript.lf'
     var archivo = new Blob([editorRef.current.getValue()], { type: 'text/plain' });
     if (window.navigator.msSaveOrOpenBlob)
       window.navigator.msSaveOrOpenBlob(archivo, nombreArchivo);
@@ -65,6 +66,88 @@ function App() {
         document.querySelector('#consola').value = response.Salida;
       })
   }
+
+  function AST() {
+    fetch(`http://localhost:${PORT}/AST`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+      }
+    })
+      .then(res => res.json())
+      .catch(err => {
+        console.error('Error:', err)
+        alert("Error")
+      })
+      .then(response => {
+        console.log(response);
+        document.querySelector('#AST').innerHTML = "<img src=\"AST.svg\">";
+      })
+
+  }
+
+  function Errores() {
+    fetch(`http://localhost:${PORT}/Errores`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+      }
+    })
+      .then(res => res.json())
+      .catch(err => {
+        console.error('Error:', err)
+        alert("Error")
+      })
+      .then(response => {
+        console.log(response.respuesta);
+        let listaErrores = []
+        listaErrores = JSON.parse(response.respuesta)
+        var datos = `
+        <!DOCTYPE html>
+        <html lang="es">
+        <head>
+            <meta charset="UTF-8">
+            <meta http-equiv="X-UA-Compatible" content="IE=edge">
+            <title> Factura </title>
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet"
+                integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
+        </head>
+        <body >        
+            <div style="position: absolute; width: 98%; left: 1%; top: 300px;">
+                <table class="table table-ligth table-striped table-hover table-bordered border-dark">
+                    <thead >
+                        <tr>
+                            <th scope="col">TIPO</th>
+                            <th scope="col">DESCRIPCION</th>
+                            <th scope="col">LINEA</th>
+                            <th scope="col">COLUMNA</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+`
+        listaErrores.forEach(error => {
+          datos += ` <tr>
+  <td scope="col"> ${error.tipo} </td>
+  <td scope="col"> ${error.mensaje}</td>
+  <td scope="col"> ${error.linea}</td>
+  <td scope="col"> ${error.columna}</td>
+</tr>`
+        });
+        datos += `                    </tbody>
+</table>
+</div>
+</body>
+</html>`
+
+        var win = window.open('', '', 'height=700,width=700');
+        win.document.write(datos);
+        win.document.close();
+      })
+
+  }
+
   return (
     <><nav className="navbar navbar-expand-lg navbar-dark bg-dark">
       <div className="container">
@@ -92,8 +175,8 @@ function App() {
                 Reportes
               </a>
               <ul className="dropdown-menu">
-                <li><a className="dropdown-item" role="button" onClick={showValue}> Errores</a></li>
-                <li><a className="dropdown-item" role="button">Generar AST</a></li>
+                <li><a className="dropdown-item" role="button" onClick={Errores}> Errores</a></li>
+                <li><a className="dropdown-item" role="button" onClick={AST}>Generar AST</a></li>
                 <li><a className="dropdown-item" role="button">Tabla de Símbolos</a></li>
               </ul>
             </li>
@@ -135,6 +218,10 @@ function App() {
         <textarea className=" form-control" id="consola" wrap="off" readOnly> </textarea>
         <div style={{ marginBottom: '25px' }} ></div>
       </form>
+
+      <div id="AST">
+
+      </div>
     </>
 
   );

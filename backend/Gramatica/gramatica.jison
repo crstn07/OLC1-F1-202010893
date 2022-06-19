@@ -4,6 +4,7 @@
 	const TIPO_DATO			= require('../interprete/tablaSimbolos').TIPO_DATO; 
 	const TIPO_VARIABLE		= require('../interprete/tablaSimbolos').TIPO_VARIABLE; 
 	const instrucciones	    = require('../interprete/instrucciones').instrucciones;
+	var listaErrores 		= require('../interprete/instrucciones').listaErrores;
 %}
 
 %lex
@@ -83,8 +84,15 @@
 ([a-zA-Z])[a-zA-Z0-9_]*	return 'IDENTIFICADOR';
 
 <<EOF>>				return 'EOF';
-.					{ console.error('Este es un error léxico: ' + yytext + ', en la linea: ' + yylloc.first_line + ', en la columna: ' + yylloc.first_column); }
-
+.					{ 
+	//console.error('Este es un error léxico: ' + yytext + ', en la linea: ' + yylloc.first_line + ', en la columna: ' + yylloc.first_column); 
+	listaErrores.push({
+		tipo:"LEXICO",
+		linea:yylloc.first_line,
+		columna:yylloc.first_column,
+		mensaje:'>>ERROR LEXICO: ' + yytext + ', en la linea: ' + yylloc.first_line + ', en la columna: ' + yylloc.first_column
+		})
+	}
 /lex
 
 /* Asociación de operadores y precedencia */
@@ -131,7 +139,15 @@ instruccion
 	| VOID IDENTIFICADOR params statement 		{ $$ = instrucciones.nuevoMetodo("VOID",$2,$3,$4);}
 	| tipo IDENTIFICADOR params statement 		{ $$ = instrucciones.nuevoMetodo($1,$2,$3,$4);}
 	| CALL IDENTIFICADOR PAR_ABRE parametros_asignar PAR_CIERRA PTCOMA { $$ = instrucciones.ejecutarMetodo($2,$4);}
-	| error { console.error('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column); }
+	| statement 		{ $$ = instrucciones.nuevoBloque($1); }
+	| error {  console.error('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column); 
+			listaErrores.push({
+				tipo: "SINTACTICO",
+				linea: this._$.first_line,
+				columna: this._$.first_column,
+				mensaje: '>>ERROR SINTACTICO: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column
+			});
+	}
 ;
 
 identificadores

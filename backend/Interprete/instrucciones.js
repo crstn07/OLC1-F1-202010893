@@ -54,6 +54,7 @@ const TIPO_INSTRUCCION = {
 	DECLARAR_METODO: 'INSTR_DECLARAR_METODO',
 	EJECUTAR_METODO: 'INSTR_EJECUTAR_METODO',
 	RETURN: 'INSTR_RETURN',
+	NUEVO_BLOQUE: 'INSTR_NUEVO_BLOQUE',
 }
 
 const TIPO_OPCION_SWITCH = {
@@ -260,11 +261,18 @@ const instrucciones = {
 		identificador: id,
 		parametrosAsignar: parametros
 	}),
+
+	nuevoBloque: (instrucciones) => ({
+		tipo: TIPO_INSTRUCCION.NUEVO_BLOQUE,
+		instrucciones: instrucciones
+	}),
 	
 }
 
+const listaErrores = []
 module.exports.TIPO_OPERACION = TIPO_OPERACION;
 module.exports.TIPO_INSTRUCCION = TIPO_INSTRUCCION;
 module.exports.TIPO_VALOR = TIPO_VALOR;
 module.exports.instrucciones = instrucciones;
 module.exports.TIPO_OPCION_SWITCH = TIPO_OPCION_SWITCH;
+module.exports.listaErrores = listaErrores;

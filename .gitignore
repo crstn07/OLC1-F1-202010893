@@ -1,3 +1,7 @@
+*.dot
+*.json
+*.svg
+
 # Logs
 logs
 *.log

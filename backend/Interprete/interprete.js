@@ -5,11 +5,11 @@ const TIPO_INSTRUCCION = require('./instrucciones').TIPO_INSTRUCCION;
 const TIPO_OPERACION = require('./instrucciones').TIPO_OPERACION;
 const TIPO_VALOR = require('./instrucciones').TIPO_VALOR;
 const TIPO_OPCION_SWITCH = require('./instrucciones').TIPO_OPCION_SWITCH;
+var listaErrores = require('../interprete/instrucciones').listaErrores;
 
 // Tabla de Simbolos
 const TIPO_DATO = require('./tablaSimbolos').TIPO_DATO;
 const TS = require('./tablaSimbolos').TS;
-
 salida = "";
 
 function analizar(entrada) {
@@ -29,103 +29,118 @@ function analizar(entrada) {
 
     // Procesa las instrucciones reconocidas en el AST
     procesarBloque(ast_instrucciones, tsGlobal)
-    return salida
+    listaErrores.forEach(_error => {
+        salida += _error.mensaje + "\n";
+    });
+    return { salida, ast: ast_instrucciones, listaErrores}
 }
 
 
 // Recorre las instrucciones en un bloque, las identifica y las procesa
 
 function procesarBloque(instrucciones, tablaDeSimbolos) {
-    instrucciones.forEach(instruccion => {
-        if (instruccion.tipo === TIPO_INSTRUCCION.DECLARAR_METODO) {
-            procesarDeclararMetodo(instruccion, tablaDeSimbolos);
-        }
-    })
-
-    breakvar = false;
-    continuevar = false;
-    returnvar = undefined;
-    for (const instruccion of instrucciones) {
-        if (instruccion.tipo === TIPO_INSTRUCCION.PRINT) {
-            // Procesando Instrucción Print
-            salida += procesarPrint(instruccion, tablaDeSimbolos);
-        } else if (instruccion.tipo === TIPO_INSTRUCCION.PRINTLN) {
-            // Procesando Instrucción Println
-            salida += procesarPrintln(instruccion, tablaDeSimbolos);
-        } else if (instruccion.tipo === TIPO_INSTRUCCION.DECLARACION) {
-            // Procesando Instrucción Declaración
-            procesarDeclaracion(instruccion, tablaDeSimbolos);
-        } else if (instruccion.tipo === TIPO_INSTRUCCION.ASIGNACION) {
-            // Procesando Instrucción Asignación
-            procesarAsignacion(instruccion, tablaDeSimbolos);
-        } else if (instruccion.tipo === TIPO_INSTRUCCION.DECLARACION_ASIGNACION) {
-            // Procesando Instrucción Declaración Asignación
-            procesarDeclaracionAsignacion(instruccion, tablaDeSimbolos);
-        } else if (instruccion.tipo === TIPO_OPERACION.INCREMENTO_POST) {
-            // Procesando Incremento Post
-            procesarIncrementoPost(instruccion, tablaDeSimbolos);
-        } else if (instruccion.tipo === TIPO_OPERACION.DECREMENTO_POST) {
-            // Procesando Decremento Post
-            procesarDecrementoPost(instruccion, tablaDeSimbolos);
-        } else if (instruccion.tipo === TIPO_OPERACION.INCREMENTO_PRE) {
-            // Procesando Incremento Pre
-            procesarIncrementoPre(instruccion, tablaDeSimbolos);
-        } else if (instruccion.tipo === TIPO_OPERACION.DECREMENTO_PRE) {
-            // Procesando Decremento Pre
-            procesarDecrementoPre(instruccion, tablaDeSimbolos);
-        } else if (instruccion.tipo === TIPO_INSTRUCCION.WHILE) {
-            // Procesando Instrucción While
-            let res = procesarWhile(instruccion, tablaDeSimbolos);
-            if (res !== undefined && (res.breakvar || res.continuevar)) break;
-        } else if (instruccion.tipo === TIPO_INSTRUCCION.DOWHILE) {
-            // Procesando Instrucción DOWhile
-            let res = procesarDoWhile(instruccion, tablaDeSimbolos);
-            if (res !== undefined && (res.breakvar || res.continuevar)) break;
-        } else if (instruccion.tipo == TIPO_INSTRUCCION.FOR) {
-            // Procesando Instrucción For
-            let res = procesarFor(instruccion, tablaDeSimbolos);
-            if (res !== undefined && (res.breakvar || res.continuevar)) break;
-        } else if (instruccion.tipo === TIPO_INSTRUCCION.IF) {
-            // Procesando Instrucción If
-            let res = procesarIf(instruccion, tablaDeSimbolos);
-            if (res !== undefined && (res.breakvar || res.continuevar)) break;
-        } else if (instruccion.tipo === TIPO_INSTRUCCION.IF_ELSE) {
-            // Procesando Instrucción If Else
-            let res = procesarIfElse(instruccion, tablaDeSimbolos);
-            if (res !== undefined && (res.breakvar || res.continuevar)) break;
-        } else if (instruccion.tipo === TIPO_INSTRUCCION.ELSE_IF) {
-            // Procesando Instrucción Else If
-            let res = procesarElseIf(instruccion, tablaDeSimbolos);
-            if (res !== undefined && (res.breakvar || res.continuevar)) break;
-        } else if (instruccion.tipo === TIPO_INSTRUCCION.SWITCH) {
-            // Procesando Instrucción Switch  
-            let res = procesarSwitch(instruccion, tablaDeSimbolos);
-            if (res !== undefined && (res.breakvar || res.continuevar)) break;
-        } else if (instruccion.tipo === TIPO_INSTRUCCION.EJECUTAR_METODO) {
-            // Ejecutando Metodos  
-            console.log("SALIDA <<ANTES>> DE EJECUTAR LA INSTRUCCION METODO: \"", salida,"\"")
-            procesarEjecutarMetodo(instruccion, tablaDeSimbolos);
-            console.log("SALIDA <<DESPUES>> DE EJECUTAR LA INSTRUCCION METODO: \"",salida,"\"")
-        } else if (instruccion.tipo === TIPO_INSTRUCCION.DECLARAR_METODO) {
-            // IGNORA LA DECLARACION
-        } else if (instruccion.tipo === TIPO_INSTRUCCION.BREAK) {
-            breakvar = true
-            return { breakvar: breakvar, continuevar: continuevar, returnvar: returnvar}
-        } else if (instruccion.tipo === TIPO_INSTRUCCION.CONTINUE) {
-            continuevar = true
-            return { breakvar: breakvar, continuevar: continuevar, returnvar: returnvar}
-        } else if (instruccion.tipo === TIPO_INSTRUCCION.RETURN) {
-            if (instruccion.expresion!==undefined) {
-                returnvar = procesarExpresion(instruccion.expresion, tablaDeSimbolos);
+    try {
+        instrucciones.forEach(instruccion => {
+            if (instruccion.tipo === TIPO_INSTRUCCION.DECLARAR_METODO) {
+                procesarDeclararMetodo(instruccion, tablaDeSimbolos);
             }
-            return {  breakvar, continuevar, returnvar };
-        } else {
-            return { valor: 'ERROR: tipo de instrucción no válido: ' + instruccion + "\n", tipo: "ERROR SEMANTICO" };
-        }
-    };
-    //return { instrucciones: instrucciones, ts: tablaDeSimbolos, salida: salida }
-    //console.log("RETURN :" , returnvar)
-    return { breakvar, continuevar, returnvar };
+        })
+
+        breakvar = false;
+        continuevar = false;
+        returnvar = undefined;
+        for (const instruccion of instrucciones) {
+            if (instruccion.tipo === TIPO_INSTRUCCION.PRINT) {
+                // Procesando Instrucción Print
+                salida += procesarPrint(instruccion, tablaDeSimbolos);
+            } else if (instruccion.tipo === TIPO_INSTRUCCION.PRINTLN) {
+                // Procesando Instrucción Println
+                salida += procesarPrintln(instruccion, tablaDeSimbolos);
+            } else if (instruccion.tipo === TIPO_INSTRUCCION.DECLARACION) {
+                // Procesando Instrucción Declaración
+                procesarDeclaracion(instruccion, tablaDeSimbolos);
+            } else if (instruccion.tipo === TIPO_INSTRUCCION.ASIGNACION) {
+                // Procesando Instrucción Asignación
+                procesarAsignacion(instruccion, tablaDeSimbolos);
+            } else if (instruccion.tipo === TIPO_INSTRUCCION.DECLARACION_ASIGNACION) {
+                // Procesando Instrucción Declaración Asignación
+                procesarDeclaracionAsignacion(instruccion, tablaDeSimbolos);
+            } else if (instruccion.tipo === TIPO_OPERACION.INCREMENTO_POST) {
+                // Procesando Incremento Post
+                procesarIncrementoPost(instruccion, tablaDeSimbolos);
+            } else if (instruccion.tipo === TIPO_OPERACION.DECREMENTO_POST) {
+                // Procesando Decremento Post
+                procesarDecrementoPost(instruccion, tablaDeSimbolos);
+            } else if (instruccion.tipo === TIPO_OPERACION.INCREMENTO_PRE) {
+                // Procesando Incremento Pre
+                procesarIncrementoPre(instruccion, tablaDeSimbolos);
+            } else if (instruccion.tipo === TIPO_OPERACION.DECREMENTO_PRE) {
+                // Procesando Decremento Pre
+                procesarDecrementoPre(instruccion, tablaDeSimbolos);
+            } else if (instruccion.tipo === TIPO_INSTRUCCION.WHILE) {
+                // Procesando Instrucción While
+                let res = procesarWhile(instruccion, tablaDeSimbolos);
+                if (res !== undefined && (res.breakvar || res.continuevar)) break;
+            } else if (instruccion.tipo === TIPO_INSTRUCCION.DOWHILE) {
+                // Procesando Instrucción DOWhile
+                let res = procesarDoWhile(instruccion, tablaDeSimbolos);
+                if (res !== undefined && (res.breakvar || res.continuevar)) break;
+            } else if (instruccion.tipo == TIPO_INSTRUCCION.FOR) {
+                // Procesando Instrucción For
+                let res = procesarFor(instruccion, tablaDeSimbolos);
+                if (res !== undefined && (res.breakvar || res.continuevar)) break;
+            } else if (instruccion.tipo === TIPO_INSTRUCCION.IF) {
+                // Procesando Instrucción If
+                let res = procesarIf(instruccion, tablaDeSimbolos);
+                if (res !== undefined && (res.breakvar || res.continuevar)) break;
+            } else if (instruccion.tipo === TIPO_INSTRUCCION.IF_ELSE) {
+                // Procesando Instrucción If Else
+                let res = procesarIfElse(instruccion, tablaDeSimbolos);
+                if (res !== undefined && (res.breakvar || res.continuevar)) break;
+            } else if (instruccion.tipo === TIPO_INSTRUCCION.ELSE_IF) {
+                // Procesando Instrucción Else If
+                let res = procesarElseIf(instruccion, tablaDeSimbolos);
+                if (res !== undefined && (res.breakvar || res.continuevar)) break;
+            } else if (instruccion.tipo === TIPO_INSTRUCCION.SWITCH) {
+                // Procesando Instrucción Switch  
+                let res = procesarSwitch(instruccion, tablaDeSimbolos);
+                if (res !== undefined && (res.breakvar || res.continuevar)) break;
+            } else if (instruccion.tipo === TIPO_INSTRUCCION.EJECUTAR_METODO) {
+                // Ejecutando Metodos  
+                console.log("SALIDA <<ANTES>> DE EJECUTAR LA INSTRUCCION METODO: \"", salida, "\"")
+                procesarEjecutarMetodo(instruccion, tablaDeSimbolos);
+                console.log("SALIDA <<DESPUES>> DE EJECUTAR LA INSTRUCCION METODO: \"", salida, "\"")
+            } else if (instruccion.tipo === TIPO_INSTRUCCION.DECLARAR_METODO) {
+                // IGNORA LA DECLARACION
+            } else if (instruccion.tipo === TIPO_INSTRUCCION.BREAK) {
+                breakvar = true
+                return { breakvar: breakvar, continuevar: continuevar, returnvar: returnvar }
+            } else if (instruccion.tipo === TIPO_INSTRUCCION.CONTINUE) {
+                continuevar = true
+                return { breakvar: breakvar, continuevar: continuevar, returnvar: returnvar }
+            } else if (instruccion.tipo === TIPO_INSTRUCCION.RETURN) {
+                if (instruccion.expresion !== undefined) {
+                    returnvar = procesarExpresion(instruccion.expresion, tablaDeSimbolos);
+                }
+                return { breakvar, continuevar, returnvar };
+            } else if (instruccion.tipo === TIPO_INSTRUCCION.NUEVO_BLOQUE) {
+                const nuevaTS = new TS(tablaDeSimbolos, tablaDeSimbolos.metodos);
+                procesarBloque(instruccion.instrucciones, nuevaTS);
+            } else {
+                listaErrores.push({
+                    tipo: "SEMANTICO", linea: "", columna: "",
+                    mensaje: 'ERROR: tipo de instrucción no válido: ' + instruccion + "\n"
+                })
+                return { valor: 'ERROR: tipo de instrucción no válido: ' + instruccion + "\n", tipo: "ERROR SEMANTICO" };
+            }
+        };
+        //return { instrucciones: instrucciones, ts: tablaDeSimbolos, salida: salida }
+        //console.log("RETURN :" , returnvar)
+        return { breakvar, continuevar, returnvar };
+    } catch (error) {
+
+    }
+
 }
 
 function procesarExpresion(expresion, tablaDeSimbolos) {
@@ -135,7 +150,11 @@ function procesarExpresion(expresion, tablaDeSimbolos) {
             const res = valor.valor * -1;
             return { valor: res, tipo: valor.tipo };
         } else {
-            return { valor: '>>Error Semántico: ' + valor.tipo + ' no puede negarse' + "\n", tipo: "ERROR SEMANTICO" };
+            listaErrores.push({
+                tipo: "SEMANTICO", linea: "", columna: "",
+                mensaje: '>>ERROR SEMANTICO: ' + valor.tipo + ' no puede negarse'
+            })
+            return { valor: '>>ERROR SEMANTICO: ' + valor.tipo + ' no puede negarse' + "\n", tipo: "ERROR SEMANTICO" };
         }
     } else if (expresion.tipo === TIPO_OPERACION.SUMA
         || expresion.tipo === TIPO_OPERACION.RESTA
@@ -166,13 +185,21 @@ function procesarExpresion(expresion, tablaDeSimbolos) {
                 const res = valorIzq.valor + valorDer.valor;
                 return { valor: res, tipo: TIPO_DATO.ENTERO };
             } else {
-                return { valor: '>>Error Semántico: No se puede sumar ' + valorIzq.tipo + ' con ' + valorDer.tipo + "\n", tipo: "ERROR SEMANTICO" };
+                listaErrores.push({
+                    tipo: "SEMANTICO", linea: "", columna: "",
+                    mensaje: '>>ERROR SEMANTICO: No se puede sumar ' + valorIzq.tipo + ' con ' + valorDer.tipo
+                })
+                return { valor: '>>ERROR SEMANTICO: No se puede sumar ' + valorIzq.tipo + ' con ' + valorDer.tipo + "\n", tipo: "ERROR SEMANTICO" };
             }
         }
         // RESTA
         if (expresion.tipo === TIPO_OPERACION.RESTA) {
             if (valorIzq.tipo === TIPO_DATO.CADENA || valorDer.tipo === TIPO_DATO.CADENA || valorIzq.tipo === TIPO_DATO.BOOLEAN || valorDer.tipo === TIPO_DATO.BOOLEAN) {
-                return { valor: '>>Error Semántico: No se puede restar ' + valorIzq.tipo + ' con ' + valorDer.tipo + "\n", tipo: "ERROR SEMANTICO" };
+                listaErrores.push({
+                    tipo: "SEMANTICO", linea: "", columna: "",
+                    mensaje: '>>ERROR SEMANTICO: No se puede restar ' + valorIzq.tipo + ' con ' + valorDer.tipo
+                })
+                return { valor: '>>ERROR SEMANTICO: No se puede restar ' + valorIzq.tipo + ' con ' + valorDer.tipo + "\n", tipo: "ERROR SEMANTICO" };
             } else if ((valorIzq.tipo === TIPO_DATO.CARACTER && valorDer.tipo === TIPO_DATO.CARACTER)) {
                 const res = valorIzq.valor.charCodeAt(0) - valorDer.valor.charCodeAt(0);
                 return { valor: res, tipo: TIPO_DATO.ENTERO };
@@ -193,7 +220,11 @@ function procesarExpresion(expresion, tablaDeSimbolos) {
         //MULTIPLICACION
         if (expresion.tipo === TIPO_OPERACION.MULTIPLICACION) {
             if (valorIzq.tipo === TIPO_DATO.CADENA || valorDer.tipo === TIPO_DATO.CADENA || valorIzq.tipo === TIPO_DATO.BOOLEAN || valorDer.tipo === TIPO_DATO.BOOLEAN) {
-                return { valor: '>>Error Semántico: No se puede multiplicar ' + valorIzq.tipo + ' por ' + valorDer.tipo + "\n", tipo: "ERROR SEMANTICO" };
+                listaErrores.push({
+                    tipo: "SEMANTICO", linea: "", columna: "",
+                    mensaje: '>>ERROR SEMANTICO: No se puede multiplicar ' + valorIzq.tipo + ' por ' + valorDer.tipo 
+                })
+                return { valor: '>>ERROR SEMANTICO: No se puede multiplicar ' + valorIzq.tipo + ' por ' + valorDer.tipo + "\n", tipo: "ERROR SEMANTICO" };
             } else if (valorIzq.tipo === TIPO_DATO.DECIMAL || valorDer.tipo === TIPO_DATO.DECIMAL) {
                 if (valorIzq.tipo === TIPO_DATO.CARACTER) valorIzq.valor = valorIzq.valor.charCodeAt(0);
                 if (valorDer.tipo === TIPO_DATO.CARACTER) valorDer.valor = valorDer.valor.charCodeAt(0);
@@ -217,7 +248,11 @@ function procesarExpresion(expresion, tablaDeSimbolos) {
             if (valorDer.tipo === TIPO_DATO.CARACTER) valorDer.valor = valorDer.valor.charCodeAt(0);
 
             if (valorIzq.tipo === TIPO_DATO.CADENA || valorDer.tipo === TIPO_DATO.CADENA || valorIzq.tipo === TIPO_DATO.BOOLEAN || valorDer.tipo === TIPO_DATO.BOOLEAN) {
-                return { valor: '>>Error Semántico: No se puede dividir ' + valorIzq.tipo + ' entre ' + valorDer.tipo + "\n", tipo: "ERROR SEMANTICO" };
+                listaErrores.push({
+                    tipo: "SEMANTICO", linea: "", columna: "",
+                    mensaje: '>>ERROR SEMANTICO: No se puede dividir ' + valorIzq.tipo + ' entre ' + valorDer.tipo
+                })
+                return { valor: '>>ERROR SEMANTICO: No se puede dividir ' + valorIzq.tipo + ' entre ' + valorDer.tipo + "\n", tipo: "ERROR SEMANTICO" };
             } else if (valorIzq.tipo === TIPO_DATO.DECIMAL || valorDer.tipo === TIPO_DATO.DECIMAL) {
                 if (valorDer.valor === 0) {
                     return { valor: '>>ERROR la division entre 0 da como resultado: ' + valorIzq / valorDer, tipo: "ERROR" };
@@ -244,7 +279,11 @@ function procesarExpresion(expresion, tablaDeSimbolos) {
         //POTENCIA
         if (expresion.tipo === TIPO_OPERACION.POTENCIA) {
             if (valorIzq.tipo === TIPO_DATO.CADENA || valorDer.tipo === TIPO_DATO.CADENA || valorIzq.tipo === TIPO_DATO.BOOLEAN || valorDer.tipo === TIPO_DATO.BOOLEAN) {
-                return { valor: '>>Error Semántico: No se puede realizar la potencia con ' + valorIzq.tipo + ' y ' + valorDer.tipo + "\n", tipo: "ERROR SEMANTICO" };
+                listaErrores.push({
+                    tipo: "SEMANTICO", linea: "", columna: "",
+                    mensaje: '>>ERROR SEMANTICO: No se puede realizar la potencia con ' + valorIzq.tipo + ' y ' + valorDer.tipo
+                })
+                return { valor: '>>ERROR SEMANTICO: No se puede realizar la potencia con ' + valorIzq.tipo + ' y ' + valorDer.tipo + "\n", tipo: "ERROR SEMANTICO" };
             } else {
                 if (valorIzq.tipo === TIPO_DATO.CARACTER) valorIzq.valor = valorIzq.valor.charCodeAt(0);
                 if (valorDer.tipo === TIPO_DATO.CARACTER) valorDer.valor = valorDer.valor.charCodeAt(0);
@@ -256,7 +295,11 @@ function procesarExpresion(expresion, tablaDeSimbolos) {
         // MODULO
         if (expresion.tipo === TIPO_OPERACION.MODULO) {
             if (valorIzq.tipo === TIPO_DATO.CADENA || valorDer.tipo === TIPO_DATO.CADENA || valorIzq.tipo === TIPO_DATO.BOOLEAN || valorDer.tipo === TIPO_DATO.BOOLEAN) {
-                return { valor: '>>Error Semántico: No se puede realizar el módulo con ' + valorIzq.tipo + ' y ' + valorDer.tipo + "\n", tipo: "ERROR SEMANTICO" };
+                listaErrores.push({
+                    tipo: "SEMANTICO", linea: "", columna: "",
+                    mensaje: '>>ERROR SEMANTICO: No se puede realizar el módulo con ' + valorIzq.tipo + ' y ' + valorDer.tipo
+                })
+                return { valor: '>>ERROR SEMANTICO: No se puede realizar el módulo con ' + valorIzq.tipo + ' y ' + valorDer.tipo + "\n", tipo: "ERROR SEMANTICO" };
             } else {
                 if (valorIzq.tipo === TIPO_DATO.CARACTER) valorIzq.valor = valorIzq.valor.charCodeAt(0);
                 if (valorDer.tipo === TIPO_DATO.CARACTER) valorDer.valor = valorDer.valor.charCodeAt(0);
@@ -311,7 +354,11 @@ function procesarExpresion(expresion, tablaDeSimbolos) {
             if (expresion.tipo === TIPO_OPERACION.DIFERENTE) return { valor: valorIzq.valor !== valorDer.valor, tipo: TIPO_DATO.BOOLEAN };
 
         } else if (valorIzq.tipo === TIPO_DATO.CADENA || valorDer.tipo === TIPO_DATO.CADENA || valorIzq.tipo === TIPO_DATO.BOOLEAN || valorDer.tipo === TIPO_DATO.BOOLEAN) {
-            return { valor: '>>Error semántico: no se puede relacionar ' + valorIzq.tipo + ' con ' + valorDer.tipo + "\n", tipo: "ERROR SEMANTICO" };
+            listaErrores.push({
+                tipo: "SEMANTICO", linea: "", columna: "",
+                mensaje: '>>ERROR SEMANTICO: no se puede relacionar ' + valorIzq.tipo + ' con ' + valorDer.tipo
+            })
+            return { valor: '>>ERROR SEMANTICO: no se puede relacionar ' + valorIzq.tipo + ' con ' + valorDer.tipo + "\n", tipo: "ERROR SEMANTICO" };
         }
         else {
             if (expresion.tipo === TIPO_OPERACION.MAYOR_QUE) return { valor: valorIzq.valor > valorDer.valor, tipo: TIPO_DATO.BOOLEAN };
@@ -342,7 +389,11 @@ function procesarExpresion(expresion, tablaDeSimbolos) {
             //NOT
             return { valor: !valorIzq.valor, tipo: TIPO_DATO.BOOLEAN };
         } else {
-            return { valor: '>>Error semántico: solo se puede realizar operaciones lógicas con tipos de dato BOOLEAN\n', tipo: "ERROR SEMANTICO" };
+            listaErrores.push({
+                tipo: "SEMANTICO", linea: "", columna: "",
+                mensaje: '>>ERROR SEMANTICO: solo se puede realizar operaciones lógicas con tipos de dato BOOLEAN'
+            })
+            return { valor: '>>ERROR SEMANTICO: solo se puede realizar operaciones lógicas con tipos de dato BOOLEAN\n', tipo: "ERROR SEMANTICO" };
         }
     } else if (expresion.tipo === TIPO_OPERACION.INCREMENTO_POST) {
         if (expresion.identificador.valor != undefined) expresion.identificador = expresion.identificador.valor;
@@ -359,9 +410,9 @@ function procesarExpresion(expresion, tablaDeSimbolos) {
     } else if (expresion.tipo === TIPO_OPERACION.TYPEOF) {
         let res = procesarExpresion(expresion.expresion, tablaDeSimbolos);
         return { valor: res.tipo.toLowerCase(), tipo: TIPO_DATO.CADENA }
-    } else if (expresion.tipo === TIPO_INSTRUCCION.EJECUTAR_METODO) { 
+    } else if (expresion.tipo === TIPO_INSTRUCCION.EJECUTAR_METODO) {
         console.log("SALIDA DESPUES DE DEVOLVER EL RETORNO: \"" + salida + "\"");
-        return  procesarEjecutarMetodo(expresion, tablaDeSimbolos);
+        return procesarEjecutarMetodo(expresion, tablaDeSimbolos);
     } else {
         return { valor: 'ERROR: expresión no válida: ' + expresion + "\n", tipo: "ERROR SEMANTICO" };
     }
@@ -440,15 +491,15 @@ function procesarFor(instruccion, tablaDeSimbolos) {
     const tsFor = new TS(tablaDeSimbolos, tablaDeSimbolos.metodos);
     if (instruccion.variable.tipo === TIPO_INSTRUCCION.ASIGNACION) {
         //LA VARIABLE YA HA SIDO DECLARADA EN EL AMBITO PADRE Y SE ASIGNA VALOR
-        procesarAsignacion(instruccion.variable, tablaDeSimbolos /*Verificar por tsFor*/);
+        procesarAsignacion(instruccion.variable, tsFor /*Verificar por tsFor*/);
     } else if (instruccion.variable.tipo === TIPO_INSTRUCCION.DECLARACION_ASIGNACION) {
         //LA VARIABLE SE DECLARA EN EL AMBITO LOCAL Y SE ASIGNA DE UNA VEZ       
         procesarDeclaracionAsignacion(instruccion.variable, tsFor);
     }
     while (procesarExpresion(instruccion.expresion, tsFor).valor) {
         //let copiaArray = tsLocal.simbolos.slice();
-        //const tsFor = new TS(tablaDeSimbolos, tablaDeSimbolos.metodos);
-        var res = procesarBloque(instruccion.instrucciones, tsFor);
+        const tsForBloque = new TS(tsFor, tablaDeSimbolos.metodos);
+        var res = procesarBloque(instruccion.instrucciones, tsForBloque);
         if (res.breakvar) break;
         //if(res.continuevar) console.log("Continue");
         if (instruccion.aumento.tipo !== TIPO_INSTRUCCION.ASIGNACION) procesarExpresion(instruccion.aumento, tsFor);
@@ -506,6 +557,7 @@ function procesarSwitch(instruccion, tablaDeSimbolos) {
                 var res = procesarBloque(caso.instrucciones, tsSwitch);
                 match = true;
                 if (res != undefined && !res.breakvar) sinbreak = true;
+                else sinbreak = false;
             }
         }
         else {
@@ -555,23 +607,35 @@ function procesarEjecutarMetodo(instruccion, tablaDeSimbolos) {
                     if (metodo.tipoReturn === "VOID") {
                         let retorno = procesarBloque(metodo.instrucciones, tsMetodo).returnvar;
                         //console.log("RETORNO DE METODO: " + metodo.id + " = " + JSON.stringify(retorno));
-                        if(retorno !== undefined){
-                            salida += "\n>>Error semántico: Un método no debe tener un valor de retorno \n";
-                        } 
+                        if (retorno !== undefined) {
+                            listaErrores.push({
+                                tipo: "SEMANTICO", linea: "", columna: "",
+                                mensaje: ">>ERROR SEMANTICO: Un método no debe tener un valor de retorno"
+                            })
+                            salida += "\n>>ERROR SEMANTICO: Un método no debe tener un valor de retorno \n";
+                        }
                         break;
                     } else {
                         let retorno = procesarBloque(metodo.instrucciones, tsMetodo).returnvar;
                         console.log("RETORNO DE METODO: " + metodo.id + " = " + JSON.stringify(retorno));
-                        if(retorno === undefined){
-                            salida += "\n>>Error semántico: Una función debe tener un valor de retorno \n";
+                        if (retorno === undefined) {
+                            listaErrores.push({
+                                tipo: "SEMANTICO", linea: "", columna: "",
+                                mensaje: ">>ERROR SEMANTICO: Una función debe tener un valor de retorno"
+                            })
+                            salida += "\n>>ERROR SEMANTICO: Una función debe tener un valor de retorno \n";
                         } else if (retorno.tipo === metodo.tipoReturn) {
                             returnvar = undefined;
-                            console.log("SALIDA DESPUES DE EJECUTAR EL METODO: " + metodo.id + " = {"  + salida + "}")
+                            console.log("SALIDA DESPUES DE EJECUTAR EL METODO: " + metodo.id + " = {" + salida + "}")
                             return retorno; //{retorno, salida}
                         } else {
-                            salida += "\n>>Error semántico: El tipo de la expresión de retorno no coincide con el tipo de la función:  \"" + metodo.id + "\"\n";
+                            listaErrores.push({
+                                tipo: "SEMANTICO", linea: "", columna: "",
+                                mensaje: ">>ERROR SEMANTICO: El tipo de la expresión de retorno no coincide con el tipo de la función:  \"" + metodo.id + "\""
+                            })
+                            salida += "\n>>ERROR SEMANTICO: El tipo de la expresión de retorno no coincide con el tipo de la función:  \"" + metodo.id + "\"\n";
                             returnvar = undefined;
-                            return {valor: undefined , tipo: "STRING"};
+                            return { valor: undefined, tipo: "STRING" };
                         }
                         break;
                     }
@@ -581,12 +645,22 @@ function procesarEjecutarMetodo(instruccion, tablaDeSimbolos) {
                     error = true;
                 }
             }
-            if (error) salida += "\n>>Error semántico: problemas con los parámetros del método: \"" + metodos[0].id + "\"\n";
+            if (error) {
+                salida += "\n>>ERROR SEMANTICO: problemas con los parámetros del método: \"" + metodos[0].id + "\"\n";
+                listaErrores.push({
+                    tipo: "SEMANTICO", linea: "", columna: "",
+                    mensaje: `>>ERROR SEMANTICO: problemas con los parámetros del método: \"${metodos[0].id}\"`
+                })
+            }
             //if (errorLength) salida += "\n>>Error Sémantico: la cantidad de parámetros a asignar del método: \"" + metodos[0].id + "\" no es la misma que la de los parametros declarados\n";
-            //if(errorType) salida += "\n>>Error semántico: los tipos de los parámetros del método: \"" + metodos[0].id + "\" no coinciden \n";
+            //if(errorType) salida += "\n>>ERROR SEMANTICO: los tipos de los parámetros del método: \"" + metodos[0].id + "\" no coinciden \n";
 
         } else {
-            salida += "\n>>Error semántico: no existe el método: \"" + instruccion.identificador.toLowerCase() + "\"\n";
+            listaErrores.push({
+                tipo: "SEMANTICO", linea: "", columna: "",
+                mensaje: `>>ERROR SEMANTICO: no existe el método: \"${instruccion.identificador.toLowerCase()}\"`
+            })
+            salida += "\n>>ERROR SEMANTICO: no existe el método: \"" + instruccion.identificador.toLowerCase() + "\"\n";
         }
 
     } catch (error) {
@@ -594,5 +668,6 @@ function procesarEjecutarMetodo(instruccion, tablaDeSimbolos) {
         salida += "\n>>Ocurrió un error al ejecutar el metodo" + metodo.identificador.toLowerCase() + "\n"
     }
 }
+
 
 module.exports = analizar;
