@@ -20,9 +20,10 @@ app.get('/', (req, res) => {
 app.post('/analizar', (req, res) => {
     const contenido = req.body.Contenido
     const result = analizar(contenido);
-    console.log(result)
+    //console.log(result)
     ast = result.ast;
-    listaErrores = new Array(result.listaErrores);
+    listaErrores = result.listaErrores;
+    TS = result.TS
     generarAST(ast);
     return res.send(JSON.stringify({ "Salida": result.salida }))
 })
@@ -32,8 +33,13 @@ app.get('/AST', (req, res) => {
 })
 
 app.get('/Errores', (req, res) => {
-    console.log("LISTA ERRORES: " + listaErrores)
-    return res.send(JSON.stringify({"respuesta":listaErrores}))
+    console.log("LISTA ERRORES: " + JSON.stringify(listaErrores))
+    return res.send({"respuesta":listaErrores})
+})
+
+app.get('/TS', (req, res) => {
+    console.log(TS)
+    return res.send({"respuesta":TS})
 })
 
 function generarAST(ast) {

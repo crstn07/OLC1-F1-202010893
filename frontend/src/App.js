@@ -103,21 +103,22 @@ function App() {
       .then(response => {
         console.log(response.respuesta);
         let listaErrores = []
-        listaErrores = JSON.parse(response.respuesta)
+        listaErrores = response.respuesta
         var datos = `
         <!DOCTYPE html>
         <html lang="es">
         <head>
             <meta charset="UTF-8">
             <meta http-equiv="X-UA-Compatible" content="IE=edge">
-            <title> Factura </title>
+            <title> REPORTE ERRORES </title>
             <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet"
                 integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
         </head>
         <body >        
-            <div style="position: absolute; width: 98%; left: 1%; top: 300px;">
+            <div style="position: absolute; width: 98%; left: 1%; top: 20px;">
+            <h1 style="margin-bottom: 20px;"> <center> REPORTE DE ERRORES </center></h1>
                 <table class="table table-ligth table-striped table-hover table-bordered border-dark">
-                    <thead >
+                    <thead class="table table-dark">
                         <tr>
                             <th scope="col">TIPO</th>
                             <th scope="col">DESCRIPCION</th>
@@ -141,13 +142,90 @@ function App() {
 </body>
 </html>`
 
-        var win = window.open('', '', 'height=700,width=700');
+        var win = window.open('', '', 'height=700,width=750');
         win.document.write(datos);
         win.document.close();
       })
 
   }
 
+function TS() {
+    fetch(`http://localhost:${PORT}/TS`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+      }
+    })
+      .then(res => res.json())
+      .catch(err => {
+        console.error('Error:', err)
+        alert("Error")
+      })
+      .then(response => {
+        console.log(response.respuesta);
+        let simbolos = []
+        simbolos = response.respuesta._simbolos
+        let metodos = []
+        metodos = response.respuesta._metodos
+        var datos = `
+        <!DOCTYPE html>
+        <html lang="es">
+        <head>
+            <meta charset="UTF-8">
+            <meta http-equiv="X-UA-Compatible" content="IE=edge">
+            <title> TABLA DE SIMBOLOS </title>
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet"
+                integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
+        </head>
+        <body >        
+            <div style="position: absolute; width: 98%; left: 1%; top: 20px;">
+            <h1 style="margin-bottom: 20px;"> <center> TABLA DE SIMBOLOS </center></h1>
+                <table class="table table-ligth table-striped table-hover table-bordered border-dark">
+                    <thead class="table table-dark">
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">TIPO</th>
+                            <th scope="col">TIPO DATO</th>
+                            <th scope="col">VALOR</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+`
+        simbolos.forEach(simbolo => {
+          datos += ` <tr>
+  <td scope="col"> ${simbolo.id} </td>
+  <td scope="col"> ${simbolo.tipoVar}</td>
+  <td scope="col"> ${simbolo.tipo}</td>
+  <td scope="col"> ${simbolo.valor}</td>
+</tr>`
+        });
+        metodos.forEach(metodo => {
+          let tipo = ""
+          if (metodo.tipoReturn === "VOID") {
+            tipo = "MÉTODO"
+          } else {
+            tipo = "FUNCIÓN"
+          }
+          datos += ` <tr>
+  <td scope="col"> ${metodo.id} </td>
+  <td scope="col"> ${tipo} </td>
+  <td scope="col"> ${metodo.tipoReturn}</td>
+  <td scope="col"> </td>
+</tr>`
+        });
+        datos += `                    </tbody>
+</table>
+</div>
+</body>
+</html>`
+
+        var win = window.open('', '', 'height=700,width=750');
+        win.document.write(datos);
+        win.document.close();
+      })
+
+  }
   return (
     <><nav className="navbar navbar-expand-lg navbar-dark bg-dark">
       <div className="container">
@@ -177,7 +255,7 @@ function App() {
               <ul className="dropdown-menu">
                 <li><a className="dropdown-item" role="button" onClick={Errores}> Errores</a></li>
                 <li><a className="dropdown-item" role="button" onClick={AST}>Generar AST</a></li>
-                <li><a className="dropdown-item" role="button">Tabla de Símbolos</a></li>
+                <li><a className="dropdown-item" role="button" onClick={TS}>Tabla de Símbolos</a></li>
               </ul>
             </li>
             <li>

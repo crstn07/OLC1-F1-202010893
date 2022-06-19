@@ -13,11 +13,12 @@ const TS = require('./tablaSimbolos').TS;
 salida = "";
 
 function analizar(entrada) {
+    listaErrores.splice(0, listaErrores.length);
     let ast_instrucciones;
     salida = "";
     try {
         ast_instrucciones = parser.parse(entrada.toString());
-        console.log(ast_instrucciones)
+        //console.log(ast_instrucciones)
         //fs.writeFileSync('./ast.json', JSON.stringify(ast_instrucciones, null, 2));
     } catch (e) {
         console.error(e);
@@ -32,7 +33,7 @@ function analizar(entrada) {
     listaErrores.forEach(_error => {
         salida += _error.mensaje + "\n";
     });
-    return { salida, ast: ast_instrucciones, listaErrores}
+    return { salida, ast: ast_instrucciones, listaErrores, TS:tsGlobal };
 }
 
 
