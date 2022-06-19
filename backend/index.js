@@ -59,7 +59,7 @@ function generarAST(ast) {
     });
 
     dot += nodos + conexiones + "\n}";
-    fs.writeFileSync('AST.dot', dot);
+    //fs.writeFileSync('AST.dot', dot);
     // Compile the graph to SVG using the `dot` layout algorithm
     graphviz.dot(dot, 'svg').then((svg) => {
          // Write the SVG to file

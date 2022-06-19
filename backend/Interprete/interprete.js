@@ -30,10 +30,13 @@ function analizar(entrada) {
 
     // Procesa las instrucciones reconocidas en el AST
     procesarBloque(ast_instrucciones, tsGlobal)
+    if (listaErrores.length > 0) {
+        salida += "\n========== ERRORES ==========\n";
+    }
     listaErrores.forEach(_error => {
         salida += _error.mensaje + "\n";
     });
-    return { salida, ast: ast_instrucciones, listaErrores, TS:tsGlobal };
+    return { salida, ast: ast_instrucciones, listaErrores, TS: tsGlobal };
 }
 
 
@@ -223,7 +226,7 @@ function procesarExpresion(expresion, tablaDeSimbolos) {
             if (valorIzq.tipo === TIPO_DATO.CADENA || valorDer.tipo === TIPO_DATO.CADENA || valorIzq.tipo === TIPO_DATO.BOOLEAN || valorDer.tipo === TIPO_DATO.BOOLEAN) {
                 listaErrores.push({
                     tipo: "SEMANTICO", linea: "", columna: "",
-                    mensaje: '>>ERROR SEMANTICO: No se puede multiplicar ' + valorIzq.tipo + ' por ' + valorDer.tipo 
+                    mensaje: '>>ERROR SEMANTICO: No se puede multiplicar ' + valorIzq.tipo + ' por ' + valorDer.tipo
                 })
                 return { valor: '>>ERROR SEMANTICO: No se puede multiplicar ' + valorIzq.tipo + ' por ' + valorDer.tipo + "\n", tipo: "ERROR SEMANTICO" };
             } else if (valorIzq.tipo === TIPO_DATO.DECIMAL || valorDer.tipo === TIPO_DATO.DECIMAL) {
@@ -613,7 +616,7 @@ function procesarEjecutarMetodo(instruccion, tablaDeSimbolos) {
                                 tipo: "SEMANTICO", linea: "", columna: "",
                                 mensaje: ">>ERROR SEMANTICO: Un método no debe tener un valor de retorno"
                             })
-                            salida += "\n>>ERROR SEMANTICO: Un método no debe tener un valor de retorno \n";
+                            //salida += "\n>>ERROR SEMANTICO: Un método no debe tener un valor de retorno \n";
                         }
                         break;
                     } else {
@@ -624,7 +627,7 @@ function procesarEjecutarMetodo(instruccion, tablaDeSimbolos) {
                                 tipo: "SEMANTICO", linea: "", columna: "",
                                 mensaje: ">>ERROR SEMANTICO: Una función debe tener un valor de retorno"
                             })
-                            salida += "\n>>ERROR SEMANTICO: Una función debe tener un valor de retorno \n";
+                            //salida += "\n>>ERROR SEMANTICO: Una función debe tener un valor de retorno \n";
                         } else if (retorno.tipo === metodo.tipoReturn) {
                             returnvar = undefined;
                             console.log("SALIDA DESPUES DE EJECUTAR EL METODO: " + metodo.id + " = {" + salida + "}")
@@ -634,7 +637,7 @@ function procesarEjecutarMetodo(instruccion, tablaDeSimbolos) {
                                 tipo: "SEMANTICO", linea: "", columna: "",
                                 mensaje: ">>ERROR SEMANTICO: El tipo de la expresión de retorno no coincide con el tipo de la función:  \"" + metodo.id + "\""
                             })
-                            salida += "\n>>ERROR SEMANTICO: El tipo de la expresión de retorno no coincide con el tipo de la función:  \"" + metodo.id + "\"\n";
+                            //salida += "\n>>ERROR SEMANTICO: El tipo de la expresión de retorno no coincide con el tipo de la función:  \"" + metodo.id + "\"\n";
                             returnvar = undefined;
                             return { valor: undefined, tipo: "STRING" };
                         }
@@ -647,7 +650,7 @@ function procesarEjecutarMetodo(instruccion, tablaDeSimbolos) {
                 }
             }
             if (error) {
-                salida += "\n>>ERROR SEMANTICO: problemas con los parámetros del método: \"" + metodos[0].id + "\"\n";
+                // salida += "\n>>ERROR SEMANTICO: problemas con los parámetros del método: \"" + metodos[0].id + "\"\n";
                 listaErrores.push({
                     tipo: "SEMANTICO", linea: "", columna: "",
                     mensaje: `>>ERROR SEMANTICO: problemas con los parámetros del método: \"${metodos[0].id}\"`
@@ -661,7 +664,7 @@ function procesarEjecutarMetodo(instruccion, tablaDeSimbolos) {
                 tipo: "SEMANTICO", linea: "", columna: "",
                 mensaje: `>>ERROR SEMANTICO: no existe el método: \"${instruccion.identificador.toLowerCase()}\"`
             })
-            salida += "\n>>ERROR SEMANTICO: no existe el método: \"" + instruccion.identificador.toLowerCase() + "\"\n";
+            //salida += "\n>>ERROR SEMANTICO: no existe el método: \"" + instruccion.identificador.toLowerCase() + "\"\n";
         }
 
     } catch (error) {
