@@ -18,7 +18,7 @@ function analizar(entrada) {
     salida = "";
     try {
         ast_instrucciones = parser.parse(entrada.toString());
-        //console.log(ast_instrucciones)
+        console.log(ast_instrucciones)
         //fs.writeFileSync('./ast.json', JSON.stringify(ast_instrucciones, null, 2));
     } catch (e) {
         console.error(e);
@@ -130,6 +130,9 @@ function procesarBloque(instrucciones, tablaDeSimbolos) {
             } else if (instruccion.tipo === TIPO_INSTRUCCION.NUEVO_BLOQUE) {
                 const nuevaTS = new TS(tablaDeSimbolos, tablaDeSimbolos.metodos);
                 procesarBloque(instruccion.instrucciones, nuevaTS);
+            } else if (instruccion.tipo === TIPO_INSTRUCCION.TERNARIO_INS) {
+                console.log("INSTRUCCIONES: " , instruccion)
+                procesarTernarioIns(instruccion, tablaDeSimbolos);
             } else {
                 listaErrores.push({
                     tipo: "SEMANTICO", linea: "", columna: "",
@@ -142,7 +145,7 @@ function procesarBloque(instrucciones, tablaDeSimbolos) {
         //console.log("RETURN :" , returnvar)
         return { breakvar, continuevar, returnvar };
     } catch (error) {
-
+        console.log("ERROR :" , error)
     }
 
 }
@@ -417,7 +420,9 @@ function procesarExpresion(expresion, tablaDeSimbolos) {
     } else if (expresion.tipo === TIPO_INSTRUCCION.EJECUTAR_METODO) {
         console.log("SALIDA DESPUES DE DEVOLVER EL RETORNO: \"" + salida + "\"");
         return procesarEjecutarMetodo(expresion, tablaDeSimbolos);
-    } else {
+    }  else if (expresion.tipo === TIPO_INSTRUCCION.TERNARIO_EXP) {
+        return procesarTernarioExp(expresion, tablaDeSimbolos);
+    }  else {
         return { valor: 'ERROR: expresión no válida: ' + expresion + "\n", tipo: "ERROR SEMANTICO" };
     }
 }
@@ -572,6 +577,28 @@ function procesarSwitch(instruccion, tablaDeSimbolos) {
     });
     if (!match) procesarBloque(def.instrucciones, tsSwitch);
 
+}
+
+function procesarTernarioIns(instruccion, tablaDeSimbolos) {
+    const condicion = procesarExpresion(instruccion.expresion, tablaDeSimbolos);
+    if (condicion.valor) {
+        const tsIf = new TS(tablaDeSimbolos, tablaDeSimbolos.metodos);
+        procesarBloque(instruccion.instruccionVerdadera, tsIf);
+    } else {
+        const tsIf = new TS(tablaDeSimbolos, tablaDeSimbolos.metodos);
+        procesarBloque(instruccion.instruccionFalsa, tsIf);
+    }
+}
+
+function procesarTernarioExp(instruccion, tablaDeSimbolos) {
+    const condicion = procesarExpresion(instruccion.expresion, tablaDeSimbolos);
+    if (condicion.valor) {
+        const tsIf = new TS(tablaDeSimbolos, tablaDeSimbolos.metodos);
+        return procesarExpresion(instruccion.expresionVerdadera, tsIf);
+    } else {
+        const tsIf = new TS(tablaDeSimbolos, tablaDeSimbolos.metodos);
+        return procesarExpresion(instruccion.expresionFalsa, tsIf);
+    }
 }
 
 function procesarDeclararMetodo(instruccion, tablaDeSimbolos) {

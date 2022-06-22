@@ -55,6 +55,8 @@ const TIPO_INSTRUCCION = {
 	EJECUTAR_METODO: 'INSTR_EJECUTAR_METODO',
 	RETURN: 'INSTR_RETURN',
 	NUEVO_BLOQUE: 'INSTR_NUEVO_BLOQUE',
+	TERNARIO_INS: 'INSTR_TERNARIO_INS',
+	TERNARIO_EXP: 'INSTR_TERNARIO_EXP'
 }
 
 const TIPO_OPCION_SWITCH = {
@@ -265,6 +267,20 @@ const instrucciones = {
 	nuevoBloque: (instrucciones) => ({
 		tipo: TIPO_INSTRUCCION.NUEVO_BLOQUE,
 		instrucciones: instrucciones
+	}),
+
+	nuevoTernarioIns: (expresion, instruccionVerdadera, instruccionFalsa) => ({
+		tipo: TIPO_INSTRUCCION.TERNARIO_INS,
+		expresion:expresion,
+		instruccionVerdadera:instruccionVerdadera,
+		instruccionFalsa:instruccionFalsa, 
+	}),
+
+	nuevoTernarioExp: (expresion, expresionVerdadera, expresionFalsa) => ({
+		tipo: TIPO_INSTRUCCION.TERNARIO_EXP,
+		expresion:expresion,
+		expresionVerdadera: expresionVerdadera,
+		expresionFalsa: expresionFalsa, 
 	}),
 	
 }

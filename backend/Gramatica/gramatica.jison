@@ -61,6 +61,7 @@
 "*"					return 'POR';
 "/"					return 'DIVISION';
 "%"					return 'MODULO';
+"?"					return 'INTERROGACION';
 
 "=="				return 'IGUALIGUAL';
 "="					return 'IGUAL';
@@ -96,7 +97,7 @@
 /lex
 
 /* Asociación de operadores y precedencia */
-%left 'DOSPTS' 'COMA'
+%left 'DOSPTS' 'COMA' , 'INTERROGACION'
 %left 'OR'
 %left 'AND'
 %left 'XOR'
@@ -126,13 +127,13 @@ instruccion
 	//PRINT
 	: PRINT PAR_ABRE expresion PAR_CIERRA PTCOMA	{ $$ = instrucciones.nuevoPrint($3); }
 	| PRINTLN PAR_ABRE expresion PAR_CIERRA PTCOMA	{ $$ = instrucciones.nuevoPrintln($3); }
-	| declaracion_asignacion
+	| declaracion_asignacion PTCOMA
 	| if				
 	| SWITCH PAR_ABRE expresion PAR_CIERRA LLAVE_ABRE casos LLAVE_CIERRA	{ $$ = instrucciones.nuevoSwitch($3,$6);}
 	| WHILE PAR_ABRE expresion PAR_CIERRA LLAVE_ABRE instrucciones LLAVE_CIERRA { $$ = instrucciones.nuevoWhile($3, $6); }
 	| DO LLAVE_ABRE instrucciones LLAVE_CIERRA WHILE PAR_ABRE expresion PAR_CIERRA PTCOMA { $$ = instrucciones.nuevoDoWhile($3, $7); }	
-	| FOR PAR_ABRE declaracion_asignacion expresion PTCOMA asignacion PAR_CIERRA statement 
-		{ $$ = instrucciones.nuevoFor($3,$4,$6,$8) } 
+	| FOR PAR_ABRE declaracion_asignacion PTCOMA expresion PTCOMA asignacion PAR_CIERRA statement 
+		{ $$ = instrucciones.nuevoFor($3,$5,$7,$9) } 
 	| break
 	| continue
 	| return
@@ -140,6 +141,7 @@ instruccion
 	| tipo IDENTIFICADOR params statement 		{ $$ = instrucciones.nuevoMetodo($1,$2,$3,$4);}
 	| CALL IDENTIFICADOR PAR_ABRE parametros_asignar PAR_CIERRA PTCOMA { $$ = instrucciones.ejecutarMetodo($2,$4);}
 	| statement 		{ $$ = instrucciones.nuevoBloque($1); }
+	| ternario instruccion_ternario DOSPTS instruccion_ternario PTCOMA { $$ = instrucciones.nuevoTernarioIns($1,[$2],[$4]); }
 	| error {  console.error('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column); 
 			listaErrores.push({
 				tipo: "SINTACTICO",
@@ -150,6 +152,12 @@ instruccion
 	}
 ;
 
+instruccion_ternario
+	: PRINT PAR_ABRE expresion PAR_CIERRA 	{ $$ = instrucciones.nuevoPrint($3); }
+	| PRINTLN PAR_ABRE expresion PAR_CIERRA	{ $$ = instrucciones.nuevoPrintln($3); } 
+	| asignacion			 				{ $$ = $1; }
+	| CALL IDENTIFICADOR PAR_ABRE parametros_asignar PAR_CIERRA  { $$ = instrucciones.ejecutarMetodo($2,$4);}
+;
 identificadores
 	: identificadores COMA IDENTIFICADOR  	{$1.push($3); $$=$1;}
 	| IDENTIFICADOR							{$$=[$1]}
@@ -215,13 +223,13 @@ return
 // DECLARACION Y ASIGNACION
 declaracion_asignacion
 	: declaracion        { $$ = $1; }
-	| asignacion PTCOMA  { $$ = $1; }
+	| asignacion 		 { $$ = $1; }
 ;
 declaracion
-	: tipo identificadores PTCOMA						{ $$ = instrucciones.nuevaDeclaracion($2, $1, TIPO_VARIABLE.VARIABLE); }
-	| tipo identificadores IGUAL expresion PTCOMA		{ $$ = instrucciones.nuevaDeclaracionAsignacion($2, $4, $1, TIPO_VARIABLE.VARIABLE); }
-	| CONST tipo identificadores PTCOMA						{ $$ = instrucciones.nuevaDeclaracion($3, $2, TIPO_VARIABLE.CONSTANTE); }
-	| CONST tipo identificadores IGUAL expresion PTCOMA		{ $$ = instrucciones.nuevaDeclaracionAsignacion($3, $5, $2, TIPO_VARIABLE.CONSTANTE); }
+	: tipo identificadores						{ $$ = instrucciones.nuevaDeclaracion($2, $1, TIPO_VARIABLE.VARIABLE); }
+	| tipo identificadores IGUAL expresion 		{ $$ = instrucciones.nuevaDeclaracionAsignacion($2, $4, $1, TIPO_VARIABLE.VARIABLE); }
+	| CONST tipo identificadores 						{ $$ = instrucciones.nuevaDeclaracion($3, $2, TIPO_VARIABLE.CONSTANTE); }
+	| CONST tipo identificadores IGUAL expresion		{ $$ = instrucciones.nuevaDeclaracionAsignacion($3, $5, $2, TIPO_VARIABLE.CONSTANTE); }
 ;
 asignacion
 	: IDENTIFICADOR IGUAL expresion				{ $$ = instrucciones.nuevaAsignacion($1, $3); } 
@@ -236,6 +244,9 @@ incremento
 decremento
 	: IDENTIFICADOR DECREMENTO		{ $$ = instrucciones.nuevoDecrementoPost($1);}
 	| DECREMENTO IDENTIFICADOR		{ $$ = instrucciones.nuevoDecrementoPre($2);}
+;
+ternario
+	: expresion INTERROGACION { $$ = $1; }
 ;
 expresion
 	//Expresion Aritmetica
@@ -275,5 +286,6 @@ expresion
 	//| expresion MENOS MENOS		{ $$ = instrucciones.nuevoDecrementoPost($1);}
 	//| MENOS MENOS expresion		{ $$ = instrucciones.nuevoDecrementoPre($3);}
 	| IDENTIFICADOR PAR_ABRE parametros_asignar PAR_CIERRA { $$ = instrucciones.ejecutarMetodo($1,$3);}
+	| ternario expresion DOSPTS expresion 		   { $$ = instrucciones.nuevoTernarioExp($1,$2,$4); }
 ;
 
