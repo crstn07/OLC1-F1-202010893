@@ -42,6 +42,10 @@
 "typeof"			return 'TYPEOF';
 "call"				return 'CALL';
 "const"				return 'CONST';
+"tolower"			return 'TOLOWER';
+"toupper"			return 'TOUPPER';
+"round"				return 'ROUND';
+"length"			return 'LENGTH';
 
 ":"					return 'DOSPTS';
 ";"					return 'PTCOMA';
@@ -287,5 +291,10 @@ expresion
 	//| MENOS MENOS expresion		{ $$ = instrucciones.nuevoDecrementoPre($3);}
 	| IDENTIFICADOR PAR_ABRE parametros_asignar PAR_CIERRA { $$ = instrucciones.ejecutarMetodo($1,$3);}
 	| ternario expresion DOSPTS expresion 		   { $$ = instrucciones.nuevoTernarioExp($1,$2,$4); }
+	| TOLOWER expresion 	{ $$ = instrucciones.nuevoToLower($2); }
+	| TOUPPER expresion 	{ $$ = instrucciones.nuevoToUpper($2); }
+	| ROUND expresion 		{ $$ = instrucciones.nuevoRound($2); }
+	| LENGTH expresion { $$ = instrucciones.nuevoLength($2); }
+	
 ;
 

@@ -33,7 +33,11 @@ const TIPO_OPERACION = {
 	DECREMENTO_POST: 'OP_DECREMENTO_POST',
 	DECREMENTO_PRE: 'OP_DECREMENTO_PRE',
 
-	TYPEOF: "OP_TYPEOF"
+	TYPEOF: "OP_TYPEOF", 
+	TOLOWER: "OP_TOLOWER",
+	TOUPPER: "OP_TOUPPER",
+	ROUND: "OP_ROUND",
+	LENGTH: "OP_LENGTH",
 };
 
 const TIPO_INSTRUCCION = {
@@ -283,6 +287,25 @@ const instrucciones = {
 		expresionFalsa: expresionFalsa, 
 	}),
 	
+	nuevoToLower: (expresion) => ({
+		tipo: TIPO_OPERACION.TOLOWER,
+		expresion:expresion,
+	}),
+	
+	nuevoToUpper: (expresion) => ({
+		tipo: TIPO_OPERACION.TOUPPER,
+		expresion:expresion,
+	}),
+	
+	nuevoRound: (expresion) => ({
+		tipo: TIPO_OPERACION.ROUND,
+		expresion:expresion,
+	}),
+	
+	nuevoLength: (expresion) => ({
+		tipo: TIPO_OPERACION.LENGTH,
+		expresion:expresion,
+	}),
 }
 
 const listaErrores = []

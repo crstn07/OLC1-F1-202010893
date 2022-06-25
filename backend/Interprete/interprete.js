@@ -422,6 +422,46 @@ function procesarExpresion(expresion, tablaDeSimbolos) {
         return procesarEjecutarMetodo(expresion, tablaDeSimbolos);
     }  else if (expresion.tipo === TIPO_INSTRUCCION.TERNARIO_EXP) {
         return procesarTernarioExp(expresion, tablaDeSimbolos);
+    }  else if (expresion.tipo ===  TIPO_OPERACION.TOLOWER) {
+        let exp = procesarExpresion(expresion.expresion, tablaDeSimbolos);
+        if (exp.tipo === TIPO_DATO.CADENA) return { valor: exp.valor.toLowerCase() , tipo: TIPO_DATO.CADENA }
+        else {
+            listaErrores.push({
+                tipo: "SEMANTICO", linea: "", columna: "",
+                mensaje: '>>ERROR SEMANTICO: solo se aceptan cadenas'
+            })
+            return { valor: '>>ERROR SEMANTICO: solo se aceptan cadenas\n', tipo: "ERROR SEMANTICO" };
+        }
+    }   else if (expresion.tipo ===  TIPO_OPERACION.TOUPPER) {
+        let exp = procesarExpresion(expresion.expresion, tablaDeSimbolos);
+        if (exp.tipo === TIPO_DATO.CADENA) return { valor: exp.valor.toUpperCase() , tipo: TIPO_DATO.CADENA }
+        else {
+            listaErrores.push({
+                tipo: "SEMANTICO", linea: "", columna: "",
+                mensaje: '>>ERROR SEMANTICO: solo se aceptan cadenas'
+            })
+            return { valor: '>>ERROR SEMANTICO: solo se aceptan cadenas\n', tipo: "ERROR SEMANTICO" };
+        }
+    }  else if (expresion.tipo ===  TIPO_OPERACION.ROUND) {
+        let exp = procesarExpresion(expresion.expresion, tablaDeSimbolos);
+        if (exp.tipo === TIPO_DATO.DECIMAL) return { valor: Math.round(exp.valor) , tipo: TIPO_DATO.ENTERO }
+        else {
+            listaErrores.push({
+                tipo: "SEMANTICO", linea: "", columna: "",
+                mensaje: '>>ERROR SEMANTICO: solo se aceptan decimales'
+            })
+            return { valor: '>>ERROR SEMANTICO: solo se aceptan decimales\n', tipo: "ERROR SEMANTICO" };
+        }
+    } else if (expresion.tipo ===  TIPO_OPERACION.LENGTH) {
+        let exp = procesarExpresion(expresion.expresion, tablaDeSimbolos);
+        if (exp.tipo === TIPO_DATO.CADENA) return { valor: exp.valor.length , tipo: TIPO_DATO.ENTERO }
+        else {
+            listaErrores.push({
+                tipo: "SEMANTICO", linea: "", columna: "",
+                mensaje: '>>ERROR SEMANTICO: solo se aceptan cadenas o vectores'
+            })
+            return { valor: '>>ERROR SEMANTICO: solo se aceptan cadenas o vectores\n', tipo: "ERROR SEMANTICO" };
+        }
     }  else {
         return { valor: 'ERROR: expresión no válida: ' + expresion + "\n", tipo: "ERROR SEMANTICO" };
     }
