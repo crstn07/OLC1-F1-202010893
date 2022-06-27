@@ -123,6 +123,56 @@ class TS {
         //}
     }
 
+    agregarVector(id, tipo, tipo2, valor) {
+        const simbolo = this._simbolos.filter(simbolo => simbolo.id === id.toLowerCase())[0];
+        if (!simbolo) {
+            if (Number(valor.valor)) {
+                if (tipo === tipo2) {
+                    let vector = [];
+                    for (let i = 0; i < valor.valor; i++) {
+                        if (tipo === TIPO_DATO.ENTERO || tipo === TIPO_DATO.DECIMAL) {
+                            vector.push(0);
+                        }
+                        if (tipo == TIPO_DATO.CADENA || tipo == TIPO_DATO.CARACTER) {
+                            vector.push("");
+                        }
+                        if (tipo == TIPO_DATO.BOOLEAN) {
+                            vector.push(true);
+                        }
+                    }
+                    this._simbolos.push({id: id, tipo: tipo, valor: vector, tipoVar: "VAR"});
+                } else {
+                    listaErrores.push({
+                        tipo: "SEMANTICO", linea: "", columna: "",
+                        mensaje: '>>ERROR SEMANTICO: los tipos del vector "' + id.toLowerCase() + '" no son iguales'
+                    })
+                }
+            } else {
+                console.log("valores: " , valor.valor)
+                let vector = [];
+                let error = false;
+                for (const val of valor.valor) {
+                    if (val.tipo === tipo) {
+                        vector.push(val.valor);
+                    } else{
+                        listaErrores.push({
+                            tipo: "SEMANTICO", linea: "", columna: "",
+                            mensaje: '>>ERROR SEMANTICO: los tipos del vector "' + id.toLowerCase() + '" no son iguales'
+                        })
+                        error = true;
+                        break;
+                    }
+                }
+                if(!error) this._simbolos.push({id: id, tipo: tipo, valor: vector, tipoVar: "VAR"});
+            }
+        } else {
+            listaErrores.push({
+                tipo: "SEMANTICO", linea: "", columna: "",
+                mensaje: '>>ERROR SEMANTICO: la variable "' + id.toLowerCase() + '" ya fue declarada'
+            })
+        }
+    }
+
     actualizar(id, valor) {
         id = id.toLowerCase();
         const simbolo = this._simbolos.filter(simbolo => simbolo.id === id)[0];
@@ -163,13 +213,8 @@ class TS {
     obtener(id) {
         id = id.toLowerCase();
         const simbolo = this._simbolos.filter(simbolo => simbolo.id === id)[0];
-
         if (simbolo) { return simbolo; }
         else {
-            /*             do {
-                            res = anterior.obtener(id)
-                            if(res!==undefined) { return res; }
-                        } while (anterior !== undefined); */
             if (this.anterior !== undefined) {
                 return this.anterior.obtener(id)
             }
@@ -179,7 +224,6 @@ class TS {
                     mensaje: 'ERROR: la variable ' + id + ' no ha sido declarada'
                 })
                 console.error('ERROR: la variable ' + id + ' no ha sido declarada')
-                //return undefined;
             }
         }
     }

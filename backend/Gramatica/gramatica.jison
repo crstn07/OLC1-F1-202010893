@@ -46,6 +46,7 @@
 "toupper"			return 'TOUPPER';
 "round"				return 'ROUND';
 "length"			return 'LENGTH';
+"new"				return 'NEW';
 
 ":"					return 'DOSPTS';
 ";"					return 'PTCOMA';
@@ -54,8 +55,8 @@
 "}"					return 'LLAVE_CIERRA';
 "("					return 'PAR_ABRE';
 ")"					return 'PAR_CIERRA';
-//"["					return 'CORCHETE_ABRE';
-//"]"					return 'CORCHETE_CIERRA';
+"["					return '[';
+"]"					return ']';
 
 "++"				return 'INCREMENTO';
 "--"				return 'DECREMENTO';
@@ -131,6 +132,10 @@ instruccion
 	//PRINT
 	: PRINT PAR_ABRE expresion PAR_CIERRA PTCOMA	{ $$ = instrucciones.nuevoPrint($3); }
 	| PRINTLN PAR_ABRE expresion PAR_CIERRA PTCOMA	{ $$ = instrucciones.nuevoPrintln($3); }
+	| tipo IDENTIFICADOR '[' ']' '[' ']' IGUAL NEW tipo '[' expresion ']' '[' expresion ']' PTCOMA //{ $$ = instrucciones.nuevoVector2D(); }
+	| tipo IDENTIFICADOR '[' ']' IGUAL NEW tipo '[' expresion ']' PTCOMA { $$ = instrucciones.nuevoVector1D($1,$2,$7,$9); }
+	| tipo IDENTIFICADOR '[' ']' '[' ']' IGUAL vector PTCOMA //{ $$ = instrucciones.nuevoVector2D(); }
+	| tipo IDENTIFICADOR '[' ']' IGUAL vector PTCOMA  { $$ = instrucciones.nuevoVector1D($1,$2,undefined,$6); }
 	| declaracion_asignacion PTCOMA
 	| if				
 	| SWITCH PAR_ABRE expresion PAR_CIERRA LLAVE_ABRE casos LLAVE_CIERRA	{ $$ = instrucciones.nuevoSwitch($3,$6);}
@@ -146,7 +151,7 @@ instruccion
 	| CALL IDENTIFICADOR PAR_ABRE parametros_asignar PAR_CIERRA PTCOMA { $$ = instrucciones.ejecutarMetodo($2,$4);}
 	| statement 		{ $$ = instrucciones.nuevoBloque($1); }
 	| ternario instruccion_ternario DOSPTS instruccion_ternario PTCOMA { $$ = instrucciones.nuevoTernarioIns($1,[$2],[$4]); }
-	| error {  console.error('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column); 
+ 	| error {  console.error('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column); 
 			listaErrores.push({
 				tipo: "SINTACTICO",
 				linea: this._$.first_line,
@@ -156,6 +161,15 @@ instruccion
 	}
 ;
 
+vector
+	: '[' valoresVector ']' { $$ = $2;}
+;
+valoresVector
+	: valoresVector COMA expresion 	{ $1.push($3); $$ = $1;}
+	| valoresVector COMA vector 	{ $1.push($3); $$ = $1;}
+	| expresion  	{ $$ = [$1]; }
+	| vector		{ $$ = [$1]; }
+;
 instruccion_ternario
 	: PRINT PAR_ABRE expresion PAR_CIERRA 	{ $$ = instrucciones.nuevoPrint($3); }
 	| PRINTLN PAR_ABRE expresion PAR_CIERRA	{ $$ = instrucciones.nuevoPrintln($3); } 

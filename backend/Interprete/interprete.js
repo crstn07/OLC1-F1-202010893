@@ -41,7 +41,6 @@ function analizar(entrada) {
 
 
 // Recorre las instrucciones en un bloque, las identifica y las procesa
-
 function procesarBloque(instrucciones, tablaDeSimbolos) {
     try {
         instrucciones.forEach(instruccion => {
@@ -111,9 +110,9 @@ function procesarBloque(instrucciones, tablaDeSimbolos) {
                 if (res !== undefined && (res.breakvar || res.continuevar)) break;
             } else if (instruccion.tipo === TIPO_INSTRUCCION.EJECUTAR_METODO) {
                 // Ejecutando Metodos  
-                console.log("SALIDA <<ANTES>> DE EJECUTAR LA INSTRUCCION METODO: \"", salida, "\"")
+                //console.log("SALIDA <<ANTES>> DE EJECUTAR LA INSTRUCCION METODO: \"", salida, "\"")
                 procesarEjecutarMetodo(instruccion, tablaDeSimbolos);
-                console.log("SALIDA <<DESPUES>> DE EJECUTAR LA INSTRUCCION METODO: \"", salida, "\"")
+                //console.log("SALIDA <<DESPUES>> DE EJECUTAR LA INSTRUCCION METODO: \"", salida, "\"")
             } else if (instruccion.tipo === TIPO_INSTRUCCION.DECLARAR_METODO) {
                 // IGNORA LA DECLARACION
             } else if (instruccion.tipo === TIPO_INSTRUCCION.BREAK) {
@@ -131,8 +130,9 @@ function procesarBloque(instrucciones, tablaDeSimbolos) {
                 const nuevaTS = new TS(tablaDeSimbolos, tablaDeSimbolos.metodos);
                 procesarBloque(instruccion.instrucciones, nuevaTS);
             } else if (instruccion.tipo === TIPO_INSTRUCCION.TERNARIO_INS) {
-                console.log("INSTRUCCIONES: " , instruccion)
                 procesarTernarioIns(instruccion, tablaDeSimbolos);
+            } else if (instruccion.tipo === TIPO_INSTRUCCION.DECLARACION_VECTOR) {
+                procesarDeclaracionVector(instruccion, tablaDeSimbolos);
             } else {
                 listaErrores.push({
                     tipo: "SEMANTICO", linea: "", columna: "",
@@ -145,7 +145,7 @@ function procesarBloque(instrucciones, tablaDeSimbolos) {
         //console.log("RETURN :" , returnvar)
         return { breakvar, continuevar, returnvar };
     } catch (error) {
-        console.log("ERROR :" , error)
+        console.log("ERROR :", error)
     }
 
 }
@@ -336,7 +336,10 @@ function procesarExpresion(expresion, tablaDeSimbolos) {
 
     } else if (expresion.tipo === TIPO_VALOR.IDENTIFICADOR) {
         // SE RETORNA EL VALOR DE LA TABLA DE SIMBOLOS
-        const sym = tablaDeSimbolos.obtener(expresion.valor);
+        let sym = tablaDeSimbolos.obtener(expresion.valor);
+        if (Array.isArray(sym.valor)) {
+            sym.valor = JSON.stringify(sym.valor)
+        }
         return { valor: sym.valor, tipo: sym.tipo };
     } else if (expresion.tipo === TIPO_OPERACION.MAYOR_QUE
         || expresion.tipo === TIPO_OPERACION.MENOR_QUE
@@ -420,11 +423,11 @@ function procesarExpresion(expresion, tablaDeSimbolos) {
     } else if (expresion.tipo === TIPO_INSTRUCCION.EJECUTAR_METODO) {
         console.log("SALIDA DESPUES DE DEVOLVER EL RETORNO: \"" + salida + "\"");
         return procesarEjecutarMetodo(expresion, tablaDeSimbolos);
-    }  else if (expresion.tipo === TIPO_INSTRUCCION.TERNARIO_EXP) {
+    } else if (expresion.tipo === TIPO_INSTRUCCION.TERNARIO_EXP) {
         return procesarTernarioExp(expresion, tablaDeSimbolos);
-    }  else if (expresion.tipo ===  TIPO_OPERACION.TOLOWER) {
+    } else if (expresion.tipo === TIPO_OPERACION.TOLOWER) {
         let exp = procesarExpresion(expresion.expresion, tablaDeSimbolos);
-        if (exp.tipo === TIPO_DATO.CADENA) return { valor: exp.valor.toLowerCase() , tipo: TIPO_DATO.CADENA }
+        if (exp.tipo === TIPO_DATO.CADENA) return { valor: exp.valor.toLowerCase(), tipo: TIPO_DATO.CADENA }
         else {
             listaErrores.push({
                 tipo: "SEMANTICO", linea: "", columna: "",
@@ -432,9 +435,9 @@ function procesarExpresion(expresion, tablaDeSimbolos) {
             })
             return { valor: '>>ERROR SEMANTICO: solo se aceptan cadenas\n', tipo: "ERROR SEMANTICO" };
         }
-    }   else if (expresion.tipo ===  TIPO_OPERACION.TOUPPER) {
+    } else if (expresion.tipo === TIPO_OPERACION.TOUPPER) {
         let exp = procesarExpresion(expresion.expresion, tablaDeSimbolos);
-        if (exp.tipo === TIPO_DATO.CADENA) return { valor: exp.valor.toUpperCase() , tipo: TIPO_DATO.CADENA }
+        if (exp.tipo === TIPO_DATO.CADENA) return { valor: exp.valor.toUpperCase(), tipo: TIPO_DATO.CADENA }
         else {
             listaErrores.push({
                 tipo: "SEMANTICO", linea: "", columna: "",
@@ -442,9 +445,9 @@ function procesarExpresion(expresion, tablaDeSimbolos) {
             })
             return { valor: '>>ERROR SEMANTICO: solo se aceptan cadenas\n', tipo: "ERROR SEMANTICO" };
         }
-    }  else if (expresion.tipo ===  TIPO_OPERACION.ROUND) {
+    } else if (expresion.tipo === TIPO_OPERACION.ROUND) {
         let exp = procesarExpresion(expresion.expresion, tablaDeSimbolos);
-        if (exp.tipo === TIPO_DATO.DECIMAL) return { valor: Math.round(exp.valor) , tipo: TIPO_DATO.ENTERO }
+        if (exp.tipo === TIPO_DATO.DECIMAL) return { valor: Math.round(exp.valor), tipo: TIPO_DATO.ENTERO }
         else {
             listaErrores.push({
                 tipo: "SEMANTICO", linea: "", columna: "",
@@ -452,9 +455,9 @@ function procesarExpresion(expresion, tablaDeSimbolos) {
             })
             return { valor: '>>ERROR SEMANTICO: solo se aceptan decimales\n', tipo: "ERROR SEMANTICO" };
         }
-    } else if (expresion.tipo ===  TIPO_OPERACION.LENGTH) {
+    } else if (expresion.tipo === TIPO_OPERACION.LENGTH) {
         let exp = procesarExpresion(expresion.expresion, tablaDeSimbolos);
-        if (exp.tipo === TIPO_DATO.CADENA) return { valor: exp.valor.length , tipo: TIPO_DATO.ENTERO }
+        if (exp.tipo === TIPO_DATO.CADENA) return { valor: exp.valor.length, tipo: TIPO_DATO.ENTERO }
         else {
             listaErrores.push({
                 tipo: "SEMANTICO", linea: "", columna: "",
@@ -462,7 +465,7 @@ function procesarExpresion(expresion, tablaDeSimbolos) {
             })
             return { valor: '>>ERROR SEMANTICO: solo se aceptan cadenas o vectores\n', tipo: "ERROR SEMANTICO" };
         }
-    }  else {
+    } else {
         return { valor: 'ERROR: expresión no válida: ' + expresion + "\n", tipo: "ERROR SEMANTICO" };
     }
 }
@@ -740,5 +743,26 @@ function procesarEjecutarMetodo(instruccion, tablaDeSimbolos) {
     }
 }
 
+function procesarDeclaracionVector(instruccion, tablaDeSimbolos) {
+    let exp;
+    if (instruccion.tipo_dato2) {
+        exp = procesarExpresion(instruccion.expresion, tablaDeSimbolos);
+    } else {
+        let valores = [];
+        instruccion.expresion.forEach(expresion => {
+            if (Array.isArray(expresion)) {
+                let valoresVector = []
+                expresion.forEach(expresion => {
+                    valoresVector.push(procesarExpresion(expresion, tablaDeSimbolos));
+                });
+                valores.push(valoresVector);
+            } else {
+                valores.push(procesarExpresion(expresion, tablaDeSimbolos));
+            }
+        });
+        exp = { valor: valores }
+    }
+    tablaDeSimbolos.agregarVector(instruccion.identificador, instruccion.tipo_dato, instruccion.tipo_dato2, exp)
+}
 
 module.exports = analizar;

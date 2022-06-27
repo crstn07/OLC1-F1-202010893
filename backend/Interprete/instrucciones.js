@@ -60,7 +60,8 @@ const TIPO_INSTRUCCION = {
 	RETURN: 'INSTR_RETURN',
 	NUEVO_BLOQUE: 'INSTR_NUEVO_BLOQUE',
 	TERNARIO_INS: 'INSTR_TERNARIO_INS',
-	TERNARIO_EXP: 'INSTR_TERNARIO_EXP'
+	TERNARIO_EXP: 'INSTR_TERNARIO_EXP',
+	DECLARACION_VECTOR: 'INSTR_DECLARACION_VECTOR',
 }
 
 const TIPO_OPCION_SWITCH = {
@@ -305,6 +306,14 @@ const instrucciones = {
 	nuevoLength: (expresion) => ({
 		tipo: TIPO_OPERACION.LENGTH,
 		expresion:expresion,
+	}),
+
+	nuevoVector1D: (tipo,id,tipo2, expresion ) => ({
+		tipo: TIPO_INSTRUCCION.DECLARACION_VECTOR,
+		tipo_dato: tipo,
+		identificador:id,
+		tipo_dato2: tipo2,
+		expresion: expresion,
 	}),
 }
 
