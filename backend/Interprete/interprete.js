@@ -135,6 +135,9 @@ function procesarBloque(instrucciones, tablaDeSimbolos) {
                 procesarDeclaracionVector(instruccion, tablaDeSimbolos);
             } else if (instruccion.tipo === TIPO_INSTRUCCION.MODIFICAR_VECTOR) {
                 procesarModificarVector(instruccion, tablaDeSimbolos);
+            } else if (instruccion.tipo === TIPO_INSTRUCCION.PUSH) {
+                const exp = procesarExpresion(instruccion.expresion, tablaDeSimbolos);
+                tablaDeSimbolos.Push(instruccion.identificador, exp);
             } else {
                 listaErrores.push({
                     tipo: "SEMANTICO", linea: "", columna: "",
@@ -486,8 +489,13 @@ function procesarExpresion(expresion, tablaDeSimbolos) {
         }
         return { valor: vector, tipo: TIPO_DATO.CARACTER };
     } else if (expresion.tipo === TIPO_OPERACION.INDEXOF) {
-        let exp = tablaDeSimbolos.indexof(expresion.identificador, expresion.expresion);
-        return { valor: exp, tipo: TIPO_DATO.ENTERO };
+        const exp = procesarExpresion(expresion.expresion, tablaDeSimbolos);
+        const res = tablaDeSimbolos.indexof(expresion.identificador, exp);
+        return { valor: res, tipo: TIPO_DATO.ENTERO };
+    } else if (expresion.tipo === TIPO_INSTRUCCION.PUSH) {
+        const exp = procesarExpresion(expresion.expresion, tablaDeSimbolos);
+        const res = tablaDeSimbolos.Push(expresion.identificador, exp);
+        return { valor: res, tipo: TIPO_DATO.BOOLEAN };
     } else {
         return { valor: 'ERROR: expresión no válida: ' + expresion + "\n", tipo: "ERROR SEMANTICO" };
     }

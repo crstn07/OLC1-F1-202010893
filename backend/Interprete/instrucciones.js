@@ -66,6 +66,7 @@ const TIPO_INSTRUCCION = {
 	DECLARACION_VECTOR: 'INSTR_DECLARACION_VECTOR',
 	ACCESO_VECTOR: 'INSTR_ACCESO_VECTOR',
 	MODIFICAR_VECTOR: 'INSTR_MODIFICAR_VECTOR',
+	PUSH: 'INSTR_PUSH',
 }
 
 const TIPO_OPCION_SWITCH = {
@@ -343,6 +344,12 @@ const instrucciones = {
 	
 	nuevoIndexOf: (id, expresion) => ({
 		tipo: TIPO_OPERACION.INDEXOF,
+		identificador:id,
+		expresion: expresion
+	}),
+
+	nuevoPush: (id, expresion) => ({
+		tipo: TIPO_INSTRUCCION.PUSH,
 		identificador:id,
 		expresion: expresion
 	}),
