@@ -356,6 +356,24 @@ class TS {
             }
         }
     }
+
+    Pop(id) {
+        id = id.toLowerCase();
+        const simbolo = this._simbolos.filter(simbolo => simbolo.id === id)[0];
+        if (simbolo) {
+            simbolo.valor.pop();
+        } else {
+            if (this.anterior !== undefined) {
+                this.anterior.Pop(id)
+            }
+            else {
+                listaErrores.push({
+                    tipo: "SEMANTICO", linea: "", columna: "",
+                    mensaje: '>>ERROR SEMANTICO: el vector "' + id + '" no ha sido declarado'
+                })
+            }
+        }
+    }
     /* obtenerMetodo(id) {
         id = id.toLowerCase();
         //const metodo = this._metodos.filter(metodo => metodo.id === id)[0];

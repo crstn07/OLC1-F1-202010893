@@ -138,6 +138,8 @@ function procesarBloque(instrucciones, tablaDeSimbolos) {
             } else if (instruccion.tipo === TIPO_INSTRUCCION.PUSH) {
                 const exp = procesarExpresion(instruccion.expresion, tablaDeSimbolos);
                 tablaDeSimbolos.Push(instruccion.identificador, exp);
+            } else if (instruccion.tipo === TIPO_INSTRUCCION.POP) {
+                tablaDeSimbolos.Pop(instruccion.identificador);
             } else {
                 listaErrores.push({
                     tipo: "SEMANTICO", linea: "", columna: "",

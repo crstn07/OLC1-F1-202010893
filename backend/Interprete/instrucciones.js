@@ -67,6 +67,7 @@ const TIPO_INSTRUCCION = {
 	ACCESO_VECTOR: 'INSTR_ACCESO_VECTOR',
 	MODIFICAR_VECTOR: 'INSTR_MODIFICAR_VECTOR',
 	PUSH: 'INSTR_PUSH',
+	POP: 'INSTR_POP',
 }
 
 const TIPO_OPCION_SWITCH = {
@@ -352,6 +353,11 @@ const instrucciones = {
 		tipo: TIPO_INSTRUCCION.PUSH,
 		identificador:id,
 		expresion: expresion
+	}),
+
+	nuevoPop: (id) => ({
+		tipo: TIPO_INSTRUCCION.POP,
+		identificador:id,
 	}),
 }
 

@@ -50,6 +50,7 @@
 "tochararray"		return 'TO_CHAR_ARRAY';
 "indexof"			return 'INDEXOF';
 "push"				return 'PUSH';
+"pop"				return 'POP';
 
 "."					return 'PUNTO';
 ":"					return 'DOSPTS';
@@ -144,6 +145,7 @@ instruccion
 	| IDENTIFICADOR '[' expresion ']' '[' expresion ']' IGUAL expresion PTCOMA  { $$ = instrucciones.nuevoModificarVector($1,$3,$6,$9); }
 	| IDENTIFICADOR '[' expresion ']' IGUAL expresion PTCOMA  { $$ = instrucciones.nuevoModificarVector($1,$3,undefined,$6); }
 	| IDENTIFICADOR PUNTO PUSH expresion PTCOMA { $$ = instrucciones.nuevoPush($1,$4); }
+	| IDENTIFICADOR PUNTO POP PAR_ABRE PAR_CIERRA PTCOMA { $$ = instrucciones.nuevoPop($1); }
 	| declaracion_asignacion PTCOMA
 	| if				
 	| SWITCH PAR_ABRE expresion PAR_CIERRA LLAVE_ABRE casos LLAVE_CIERRA	{ $$ = instrucciones.nuevoSwitch($3,$6);}
