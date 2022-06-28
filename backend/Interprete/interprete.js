@@ -461,11 +461,20 @@ function procesarExpresion(expresion, tablaDeSimbolos) {
         let exp = procesarExpresion(expresion.expresion, tablaDeSimbolos);
         if (exp.tipo === TIPO_DATO.CADENA) return { valor: exp.valor.length, tipo: TIPO_DATO.ENTERO }
         else {
-            listaErrores.push({
-                tipo: "SEMANTICO", linea: "", columna: "",
-                mensaje: '>>ERROR SEMANTICO: solo se aceptan cadenas o vectores'
-            })
-            return { valor: '>>ERROR SEMANTICO: solo se aceptan cadenas o vectores\n', tipo: "ERROR SEMANTICO" };
+            try {
+                exp.valor = JSON.parse(exp.valor)
+            } catch (error) {
+                console.log("error parse: " + error)
+            }
+            if (Array.isArray(exp.valor)) {
+                return { valor: exp.valor.length, tipo: TIPO_DATO.ENTERO }
+            } else {
+                listaErrores.push({
+                    tipo: "SEMANTICO", linea: "", columna: "",
+                    mensaje: '>>ERROR SEMANTICO: solo se aceptan cadenas o vectores'
+                })
+                return { valor: '>>ERROR SEMANTICO: solo se aceptan cadenas o vectores\n', tipo: "ERROR SEMANTICO" };
+            }
         }
     } else if (expresion.tipo === TIPO_INSTRUCCION.ACCESO_VECTOR) {
         return procesarAccesoVector(expresion, tablaDeSimbolos);
