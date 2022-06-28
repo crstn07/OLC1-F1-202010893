@@ -374,6 +374,31 @@ class TS {
             }
         }
     }
+
+    Splice(id, pos, valor) {
+        id = id.toLowerCase();
+        const simbolo = this._simbolos.filter(simbolo => simbolo.id === id)[0];
+        if (simbolo) {
+            if (simbolo.tipo === valor.tipo) {
+                simbolo.valor.splice(pos.valor, 0, valor.valor); 
+            }else{
+                listaErrores.push({
+                    tipo: "SEMANTICO", linea: "", columna: "",
+                    mensaje: '>>ERROR SEMANTICO: el vector "' + id + '" es de tipo ' + simbolo.tipo + ', y el valor a asignar es ' + valor.tipo
+                })
+            }
+        } else {
+            if (this.anterior !== undefined) {
+                this.anterior.Splice(id, pos, valor)
+            }
+            else {
+                listaErrores.push({
+                    tipo: "SEMANTICO", linea: "", columna: "",
+                    mensaje: '>>ERROR SEMANTICO: el vector "' + id + '" no ha sido declarado'
+                })
+            }
+        }
+    }
     /* obtenerMetodo(id) {
         id = id.toLowerCase();
         //const metodo = this._metodos.filter(metodo => metodo.id === id)[0];

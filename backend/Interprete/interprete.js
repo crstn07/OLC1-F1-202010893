@@ -140,6 +140,10 @@ function procesarBloque(instrucciones, tablaDeSimbolos) {
                 tablaDeSimbolos.Push(instruccion.identificador, exp);
             } else if (instruccion.tipo === TIPO_INSTRUCCION.POP) {
                 tablaDeSimbolos.Pop(instruccion.identificador);
+            } else if (instruccion.tipo === TIPO_INSTRUCCION.SPLICE) {
+                const pos = procesarExpresion(instruccion.pos, tablaDeSimbolos)
+                const valor = procesarExpresion(instruccion.valor, tablaDeSimbolos)
+                tablaDeSimbolos.Splice(instruccion.identificador, pos, valor);
             } else {
                 listaErrores.push({
                     tipo: "SEMANTICO", linea: "", columna: "",

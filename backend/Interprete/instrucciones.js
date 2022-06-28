@@ -68,6 +68,7 @@ const TIPO_INSTRUCCION = {
 	MODIFICAR_VECTOR: 'INSTR_MODIFICAR_VECTOR',
 	PUSH: 'INSTR_PUSH',
 	POP: 'INSTR_POP',
+	SPLICE: 'INSTR_SPLICE',
 }
 
 const TIPO_OPCION_SWITCH = {
@@ -358,6 +359,13 @@ const instrucciones = {
 	nuevoPop: (id) => ({
 		tipo: TIPO_INSTRUCCION.POP,
 		identificador:id,
+	}),
+
+	nuevoSplice: (id, pos, valor) => ({
+		tipo: TIPO_INSTRUCCION.SPLICE,
+		identificador:id,
+		pos: pos,
+		valor: valor
 	}),
 }
 

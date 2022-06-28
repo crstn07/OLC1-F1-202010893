@@ -51,6 +51,7 @@
 "indexof"			return 'INDEXOF';
 "push"				return 'PUSH';
 "pop"				return 'POP';
+"splice"			return 'SPLICE';
 
 "."					return 'PUNTO';
 ":"					return 'DOSPTS';
@@ -146,6 +147,7 @@ instruccion
 	| IDENTIFICADOR '[' expresion ']' IGUAL expresion PTCOMA  { $$ = instrucciones.nuevoModificarVector($1,$3,undefined,$6); }
 	| IDENTIFICADOR PUNTO PUSH expresion PTCOMA { $$ = instrucciones.nuevoPush($1,$4); }
 	| IDENTIFICADOR PUNTO POP PAR_ABRE PAR_CIERRA PTCOMA { $$ = instrucciones.nuevoPop($1); }
+	| IDENTIFICADOR PUNTO SPLICE PAR_ABRE expresion COMA expresion PAR_CIERRA PTCOMA { $$ = instrucciones.nuevoSplice($1,$5,$7); }
 	| declaracion_asignacion PTCOMA
 	| if				
 	| SWITCH PAR_ABRE expresion PAR_CIERRA LLAVE_ABRE casos LLAVE_CIERRA	{ $$ = instrucciones.nuevoSwitch($3,$6);}
