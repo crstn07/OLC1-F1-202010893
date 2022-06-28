@@ -39,6 +39,7 @@ const TIPO_OPERACION = {
 	ROUND: "OP_ROUND",
 	LENGTH: "OP_LENGTH",
 	TO_CHAR_ARRAY: "OP_TO_CHAR_ARRAY",
+	INDEXOF: "OP_INDEXOF"
 };
 
 const TIPO_INSTRUCCION = {
@@ -337,6 +338,12 @@ const instrucciones = {
 
 	nuevoToCharArray: (expresion) => ({
 		tipo: TIPO_OPERACION.TO_CHAR_ARRAY,
+		expresion: expresion
+	}),
+	
+	nuevoIndexOf: (id, expresion) => ({
+		tipo: TIPO_OPERACION.INDEXOF,
+		identificador:id,
 		expresion: expresion
 	}),
 }

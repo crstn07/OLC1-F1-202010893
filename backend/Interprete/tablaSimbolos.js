@@ -300,13 +300,31 @@ class TS {
             } else {
                 listaErrores.push({
                     tipo: "SEMANTICO", linea: "", columna: "",
-                    mensaje: '>>ERROR SEMANTICO: el vector "' + id + '" es de tipo ' + simbolo.tipo + ', y el valor a asignar es ' + exp.tipo 
+                    mensaje: '>>ERROR SEMANTICO: el vector "' + id + '" es de tipo ' + simbolo.tipo + ', y el valor a asignar es ' + exp.tipo
                 })
             }
         }
         else {
             if (this.anterior !== undefined) {
                 this.anterior.modificarVector(id, pos1, pos2, exp)
+            }
+            else {
+                listaErrores.push({
+                    tipo: "SEMANTICO", linea: "", columna: "",
+                    mensaje: '>>ERROR SEMANTICO: el vector "' + id + '" no ha sido declarado'
+                })
+            }
+        }
+    }
+
+    indexof(id, expresion) {
+        id = id.toLowerCase();
+        const simbolo = this._simbolos.filter(simbolo => simbolo.id === id)[0];
+        if (simbolo) {
+            return simbolo.valor.indexOf(expresion.valor);
+        } else {
+            if (this.anterior !== undefined) {
+                return this.anterior.indexof(id, expresion)
             }
             else {
                 listaErrores.push({

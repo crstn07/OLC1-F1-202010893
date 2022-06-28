@@ -48,7 +48,9 @@
 "length"			return 'LENGTH';
 "new"				return 'NEW';
 "tochararray"		return 'TO_CHAR_ARRAY';
+"indexof"			return 'INDEXOF';
 
+"."					return 'PUNTO';
 ":"					return 'DOSPTS';
 ";"					return 'PTCOMA';
 ","					return 'COMA';
@@ -316,5 +318,6 @@ expresion
 	| IDENTIFICADOR '[' expresion ']' 	{ $$ = instrucciones.nuevoAccesoVector($1,$3); }
 	| IDENTIFICADOR '[' expresion ']' '[' expresion ']' 	{ $$ = instrucciones.nuevoAccesoVector($1,$3,$6); }
 	| TO_CHAR_ARRAY expresion { $$ = instrucciones.nuevoToCharArray($2); }
+	| IDENTIFICADOR PUNTO INDEXOF expresion  { $$ = instrucciones.nuevoIndexOf($1,$4); }
 ;
 

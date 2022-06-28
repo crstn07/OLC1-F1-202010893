@@ -485,6 +485,9 @@ function procesarExpresion(expresion, tablaDeSimbolos) {
             vector.push({ valor: valor, tipo: TIPO_DATO.CARACTER })
         }
         return { valor: vector, tipo: TIPO_DATO.CARACTER };
+    } else if (expresion.tipo === TIPO_OPERACION.INDEXOF) {
+        let exp = tablaDeSimbolos.indexof(expresion.identificador, expresion.expresion);
+        return { valor: exp, tipo: TIPO_DATO.ENTERO };
     } else {
         return { valor: 'ERROR: expresión no válida: ' + expresion + "\n", tipo: "ERROR SEMANTICO" };
     }
