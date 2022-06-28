@@ -38,6 +38,7 @@ const TIPO_OPERACION = {
 	TOUPPER: "OP_TOUPPER",
 	ROUND: "OP_ROUND",
 	LENGTH: "OP_LENGTH",
+	TO_CHAR_ARRAY: "OP_TO_CHAR_ARRAY",
 };
 
 const TIPO_INSTRUCCION = {
@@ -331,6 +332,11 @@ const instrucciones = {
 		identificador:id,
 		pos1: pos1,
 		pos2: pos2,
+		expresion: expresion
+	}),
+
+	nuevoToCharArray: (expresion) => ({
+		tipo: TIPO_OPERACION.TO_CHAR_ARRAY,
 		expresion: expresion
 	}),
 }

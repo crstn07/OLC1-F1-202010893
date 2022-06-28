@@ -478,6 +478,13 @@ function procesarExpresion(expresion, tablaDeSimbolos) {
         }
     } else if (expresion.tipo === TIPO_INSTRUCCION.ACCESO_VECTOR) {
         return procesarAccesoVector(expresion, tablaDeSimbolos);
+    } else if (expresion.tipo === TIPO_OPERACION.TO_CHAR_ARRAY) {
+        let exp = procesarExpresion(expresion.expresion, tablaDeSimbolos);
+        let vector = [];
+        for (const valor of exp.valor) {
+            vector.push({ valor: valor, tipo: TIPO_DATO.CARACTER })
+        }
+        return { valor: vector, tipo: TIPO_DATO.CARACTER };
     } else {
         return { valor: 'ERROR: expresión no válida: ' + expresion + "\n", tipo: "ERROR SEMANTICO" };
     }
@@ -764,6 +771,8 @@ function procesarDeclaracionVector(instruccion, tablaDeSimbolos) {
         if (instruccion.expresion2) {
             exp2 = procesarExpresion(instruccion.expresion2, tablaDeSimbolos);
         }
+    } else if (instruccion.expresion.tipo === TIPO_OPERACION.TO_CHAR_ARRAY) {
+        exp = procesarExpresion(instruccion.expresion, tablaDeSimbolos);
     } else {
         let valores = [];
         instruccion.expresion.forEach(expresion => {

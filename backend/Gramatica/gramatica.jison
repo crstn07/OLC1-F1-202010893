@@ -47,6 +47,7 @@
 "round"				return 'ROUND';
 "length"			return 'LENGTH';
 "new"				return 'NEW';
+"tochararray"		return 'TO_CHAR_ARRAY';
 
 ":"					return 'DOSPTS';
 ";"					return 'PTCOMA';
@@ -136,6 +137,7 @@ instruccion
 	| tipo IDENTIFICADOR '[' ']' IGUAL NEW tipo '[' expresion ']' PTCOMA { $$ = instrucciones.nuevoVector($1,$2,$7,$9); }
 	| tipo IDENTIFICADOR '[' ']' '[' ']' IGUAL vector PTCOMA  { $$ = instrucciones.nuevoVector($1,$2,undefined,$8,undefined); }
 	| tipo IDENTIFICADOR '[' ']' IGUAL vector PTCOMA  { $$ = instrucciones.nuevoVector($1,$2,undefined,$6); }
+	| tipo IDENTIFICADOR '[' ']' IGUAL expresion PTCOMA  { $$ = instrucciones.nuevoVector($1,$2,undefined,$6); }
 	| IDENTIFICADOR '[' expresion ']' '[' expresion ']' IGUAL expresion PTCOMA  { $$ = instrucciones.nuevoModificarVector($1,$3,$6,$9); }
 	| IDENTIFICADOR '[' expresion ']' IGUAL expresion PTCOMA  { $$ = instrucciones.nuevoModificarVector($1,$3,undefined,$6); }
 	| declaracion_asignacion PTCOMA
@@ -313,5 +315,6 @@ expresion
 	| LENGTH expresion 		{ $$ = instrucciones.nuevoLength($2); }
 	| IDENTIFICADOR '[' expresion ']' 	{ $$ = instrucciones.nuevoAccesoVector($1,$3); }
 	| IDENTIFICADOR '[' expresion ']' '[' expresion ']' 	{ $$ = instrucciones.nuevoAccesoVector($1,$3,$6); }
+	| TO_CHAR_ARRAY expresion { $$ = instrucciones.nuevoToCharArray($2); }
 ;
 
