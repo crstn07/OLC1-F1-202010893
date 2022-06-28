@@ -745,8 +745,12 @@ function procesarEjecutarMetodo(instruccion, tablaDeSimbolos) {
 
 function procesarDeclaracionVector(instruccion, tablaDeSimbolos) {
     let exp;
+    let exp2 = {valor:undefined};
     if (instruccion.tipo_dato2) {
         exp = procesarExpresion(instruccion.expresion, tablaDeSimbolos);
+        if (instruccion.expresion2) {
+            exp2 = procesarExpresion(instruccion.expresion2, tablaDeSimbolos);
+        }
     } else {
         let valores = [];
         instruccion.expresion.forEach(expresion => {
@@ -762,7 +766,7 @@ function procesarDeclaracionVector(instruccion, tablaDeSimbolos) {
         });
         exp = { valor: valores }
     }
-    tablaDeSimbolos.agregarVector(instruccion.identificador, instruccion.tipo_dato, instruccion.tipo_dato2, exp)
+    tablaDeSimbolos.agregarVector(instruccion.identificador, instruccion.tipo_dato, instruccion.tipo_dato2, exp, exp2)
 }
 
 module.exports = analizar;

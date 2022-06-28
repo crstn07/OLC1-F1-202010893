@@ -100,11 +100,17 @@ break;
 case 5:
  this.$ = instrucciones.nuevoPrintln($$[$0-2]); 
 break;
+case 6:
+ this.$ = instrucciones.nuevoVector($$[$0-15],$$[$0-14],$$[$0-7],$$[$0-5],$$[$0-2]); 
+break;
 case 7:
- this.$ = instrucciones.nuevoVector1D($$[$0-10],$$[$0-9],$$[$0-4],$$[$0-2]); 
+ this.$ = instrucciones.nuevoVector($$[$0-10],$$[$0-9],$$[$0-4],$$[$0-2]); 
+break;
+case 8:
+ this.$ = instrucciones.nuevoVector($$[$0-8],$$[$0-7],undefined,$$[$0-1],undefined); 
 break;
 case 9:
- this.$ = instrucciones.nuevoVector1D($$[$0-6],$$[$0-5],undefined,$$[$0-1]); 
+ this.$ = instrucciones.nuevoVector($$[$0-6],$$[$0-5],undefined,$$[$0-1]); 
 break;
 case 12:
  this.$ = instrucciones.nuevoSwitch($$[$0-4],$$[$0-1]);

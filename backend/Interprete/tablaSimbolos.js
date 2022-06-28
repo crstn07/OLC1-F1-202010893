@@ -123,24 +123,41 @@ class TS {
         //}
     }
 
-    agregarVector(id, tipo, tipo2, valor) {
+    agregarVector(id, tipo, tipo2, valor, expresion2) {
         const simbolo = this._simbolos.filter(simbolo => simbolo.id === id.toLowerCase())[0];
         if (!simbolo) {
             if (Number(valor.valor)) {
                 if (tipo === tipo2) {
                     let vector = [];
                     for (let i = 0; i < valor.valor; i++) {
-                        if (tipo === TIPO_DATO.ENTERO || tipo === TIPO_DATO.DECIMAL) {
-                            vector.push(0);
+                        if (expresion2.valor) {
+                            let valoresVector = [];
+                            for (let j = 0; j < expresion2.valor; j++) {
+                                if (tipo === TIPO_DATO.ENTERO || tipo === TIPO_DATO.DECIMAL) {
+                                    valoresVector.push(0);
+                                }
+                                if (tipo == TIPO_DATO.CADENA || tipo == TIPO_DATO.CARACTER) {
+                                    valoresVector.push("");
+                                }
+                                if (tipo == TIPO_DATO.BOOLEAN) {
+                                    valoresVector.push(true);
+                                }
+                            }
+                            vector.push(valoresVector);
+                        } else {
+                            if (tipo === TIPO_DATO.ENTERO || tipo === TIPO_DATO.DECIMAL) {
+                                vector.push(0);
+                            }
+                            if (tipo == TIPO_DATO.CADENA || tipo == TIPO_DATO.CARACTER) {
+                                vector.push("");
+                            }
+                            if (tipo == TIPO_DATO.BOOLEAN) {
+                                vector.push(true);
+                            }
                         }
-                        if (tipo == TIPO_DATO.CADENA || tipo == TIPO_DATO.CARACTER) {
-                            vector.push("");
-                        }
-                        if (tipo == TIPO_DATO.BOOLEAN) {
-                            vector.push(true);
-                        }
+
                     }
-                    this._simbolos.push({id: id, tipo: tipo, valor: vector, tipoVar: "VAR"});
+                    this._simbolos.push({ id: id, tipo: tipo, valor: vector, tipoVar: "VAR" });
                 } else {
                     listaErrores.push({
                         tipo: "SEMANTICO", linea: "", columna: "",
@@ -148,22 +165,41 @@ class TS {
                     })
                 }
             } else {
-                console.log("valores: " , valor.valor)
+                console.log("valores: ", valor.valor)
                 let vector = [];
                 let error = false;
                 for (const val of valor.valor) {
-                    if (val.tipo === tipo) {
-                        vector.push(val.valor);
-                    } else{
-                        listaErrores.push({
-                            tipo: "SEMANTICO", linea: "", columna: "",
-                            mensaje: '>>ERROR SEMANTICO: los tipos del vector "' + id.toLowerCase() + '" no son iguales'
-                        })
-                        error = true;
-                        break;
+                    if (Array.isArray(val)) {
+                        let valoresVector = []
+                        for (const val2 of val) {
+                            if (val2.tipo === tipo) {
+                                valoresVector.push(val2.valor);
+                            } else {
+                                listaErrores.push({
+                                    tipo: "SEMANTICO", linea: "", columna: "",
+                                    mensaje: '>>ERROR SEMANTICO: los tipos del vector "' + id.toLowerCase() + '" no son iguales'
+                                })
+                                error = true;
+                                break;
+                            }
+                        }
+                        if (error) break;
+                        vector.push(valoresVector);
+                    } else {
+                        if (val.tipo === tipo) {
+                            vector.push(val.valor);
+                        } else {
+                            listaErrores.push({
+                                tipo: "SEMANTICO", linea: "", columna: "",
+                                mensaje: '>>ERROR SEMANTICO: los tipos del vector "' + id.toLowerCase() + '" no son iguales'
+                            })
+                            error = true;
+                            break;
+                        }
                     }
+
                 }
-                if(!error) this._simbolos.push({id: id, tipo: tipo, valor: vector, tipoVar: "VAR"});
+                if (!error) this._simbolos.push({ id: id, tipo: tipo, valor: vector, tipoVar: "VAR" });
             }
         } else {
             listaErrores.push({

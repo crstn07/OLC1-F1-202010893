@@ -132,10 +132,10 @@ instruccion
 	//PRINT
 	: PRINT PAR_ABRE expresion PAR_CIERRA PTCOMA	{ $$ = instrucciones.nuevoPrint($3); }
 	| PRINTLN PAR_ABRE expresion PAR_CIERRA PTCOMA	{ $$ = instrucciones.nuevoPrintln($3); }
-	| tipo IDENTIFICADOR '[' ']' '[' ']' IGUAL NEW tipo '[' expresion ']' '[' expresion ']' PTCOMA //{ $$ = instrucciones.nuevoVector2D(); }
-	| tipo IDENTIFICADOR '[' ']' IGUAL NEW tipo '[' expresion ']' PTCOMA { $$ = instrucciones.nuevoVector1D($1,$2,$7,$9); }
-	| tipo IDENTIFICADOR '[' ']' '[' ']' IGUAL vector PTCOMA //{ $$ = instrucciones.nuevoVector2D(); }
-	| tipo IDENTIFICADOR '[' ']' IGUAL vector PTCOMA  { $$ = instrucciones.nuevoVector1D($1,$2,undefined,$6); }
+	| tipo IDENTIFICADOR '[' ']' '[' ']' IGUAL NEW tipo '[' expresion ']' '[' expresion ']' PTCOMA { $$ = instrucciones.nuevoVector($1,$2,$9,$11,$14); }
+	| tipo IDENTIFICADOR '[' ']' IGUAL NEW tipo '[' expresion ']' PTCOMA { $$ = instrucciones.nuevoVector($1,$2,$7,$9); }
+	| tipo IDENTIFICADOR '[' ']' '[' ']' IGUAL vector PTCOMA  { $$ = instrucciones.nuevoVector($1,$2,undefined,$8,undefined); }
+	| tipo IDENTIFICADOR '[' ']' IGUAL vector PTCOMA  { $$ = instrucciones.nuevoVector($1,$2,undefined,$6); }
 	| declaracion_asignacion PTCOMA
 	| if				
 	| SWITCH PAR_ABRE expresion PAR_CIERRA LLAVE_ABRE casos LLAVE_CIERRA	{ $$ = instrucciones.nuevoSwitch($3,$6);}

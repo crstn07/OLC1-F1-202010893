@@ -308,12 +308,13 @@ const instrucciones = {
 		expresion:expresion,
 	}),
 
-	nuevoVector1D: (tipo,id,tipo2, expresion ) => ({
+	nuevoVector: (tipo, id, tipo2, expresion, expresion2 ) => ({
 		tipo: TIPO_INSTRUCCION.DECLARACION_VECTOR,
 		tipo_dato: tipo,
 		identificador:id,
 		tipo_dato2: tipo2,
 		expresion: expresion,
+		expresion2: expresion2,
 	}),
 }
 
