@@ -136,6 +136,8 @@ instruccion
 	| tipo IDENTIFICADOR '[' ']' IGUAL NEW tipo '[' expresion ']' PTCOMA { $$ = instrucciones.nuevoVector($1,$2,$7,$9); }
 	| tipo IDENTIFICADOR '[' ']' '[' ']' IGUAL vector PTCOMA  { $$ = instrucciones.nuevoVector($1,$2,undefined,$8,undefined); }
 	| tipo IDENTIFICADOR '[' ']' IGUAL vector PTCOMA  { $$ = instrucciones.nuevoVector($1,$2,undefined,$6); }
+	| IDENTIFICADOR '[' expresion ']' '[' expresion ']' IGUAL expresion PTCOMA  { $$ = instrucciones.nuevoModificarVector($1,$3,$6,$9); }
+	| IDENTIFICADOR '[' expresion ']' IGUAL expresion PTCOMA  { $$ = instrucciones.nuevoModificarVector($1,$3,undefined,$6); }
 	| declaracion_asignacion PTCOMA
 	| if				
 	| SWITCH PAR_ABRE expresion PAR_CIERRA LLAVE_ABRE casos LLAVE_CIERRA	{ $$ = instrucciones.nuevoSwitch($3,$6);}

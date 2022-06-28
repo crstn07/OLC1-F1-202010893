@@ -268,14 +268,45 @@ class TS {
         id = id.toLowerCase();
         const simbolo = this._simbolos.filter(simbolo => simbolo.id === id)[0];
         if (simbolo && expresion2) {
-        console.log("valor:" , simbolo.valor[0][1]);     
-            return  {valor: simbolo.valor[expresion.valor][expresion2.valor],tipo:simbolo.tipo}
-        } else if(simbolo){
-            return  {valor: simbolo.valor[expresion.valor],tipo:simbolo.tipo}
+            return { valor: simbolo.valor[expresion.valor][expresion2.valor], tipo: simbolo.tipo }
+        } else if (simbolo) {
+            return { valor: simbolo.valor[expresion.valor], tipo: simbolo.tipo }
         }
         else {
             if (this.anterior !== undefined) {
                 return this.anterior.obtenerValorVector(id, expresion, expresion2)
+            }
+            else {
+                listaErrores.push({
+                    tipo: "SEMANTICO", linea: "", columna: "",
+                    mensaje: '>>ERROR SEMANTICO: el vector "' + id + '" no ha sido declarado'
+                })
+            }
+        }
+    }
+
+    modificarVector(id, pos1, pos2, exp) {
+        id = id.toLowerCase();
+        const simbolo = this._simbolos.filter(simbolo => simbolo.id === id)[0];
+        if (simbolo && pos2) {
+            if (simbolo.tipo === exp.tipo) {
+                simbolo.valor[pos1.valor][pos2.valor] = exp.valor;
+            } else {
+
+            }
+        } else if (simbolo) {
+            if (simbolo.tipo === exp.tipo) {
+                simbolo.valor[pos1.valor] = exp.valor;
+            } else {
+                listaErrores.push({
+                    tipo: "SEMANTICO", linea: "", columna: "",
+                    mensaje: '>>ERROR SEMANTICO: el vector "' + id + '" es de tipo ' + simbolo.tipo + ', y el valor a asignar es ' + exp.tipo 
+                })
+            }
+        }
+        else {
+            if (this.anterior !== undefined) {
+                this.anterior.modificarVector(id, pos1, pos2, exp)
             }
             else {
                 listaErrores.push({

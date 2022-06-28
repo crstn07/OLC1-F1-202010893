@@ -133,6 +133,8 @@ function procesarBloque(instrucciones, tablaDeSimbolos) {
                 procesarTernarioIns(instruccion, tablaDeSimbolos);
             } else if (instruccion.tipo === TIPO_INSTRUCCION.DECLARACION_VECTOR) {
                 procesarDeclaracionVector(instruccion, tablaDeSimbolos);
+            } else if (instruccion.tipo === TIPO_INSTRUCCION.MODIFICAR_VECTOR) {
+                procesarModificarVector(instruccion, tablaDeSimbolos);
             } else {
                 listaErrores.push({
                     tipo: "SEMANTICO", linea: "", columna: "",
@@ -779,4 +781,15 @@ function procesarAccesoVector(instruccion, tablaDeSimbolos) {
     }
     return tablaDeSimbolos.obtenerValorVector(instruccion.identificador, exp, exp2)
 }
+
+function procesarModificarVector(instruccion, tablaDeSimbolos) {
+    let exp = procesarExpresion(instruccion.expresion, tablaDeSimbolos);
+    let pos1 = procesarExpresion(instruccion.pos1, tablaDeSimbolos);
+    let pos2;
+    if (instruccion.pos2) {
+        pos2 = procesarExpresion(instruccion.pos2, tablaDeSimbolos);
+    }
+    tablaDeSimbolos.modificarVector(instruccion.identificador, pos1, pos2, exp)
+}
+
 module.exports = analizar;

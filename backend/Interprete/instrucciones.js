@@ -63,6 +63,7 @@ const TIPO_INSTRUCCION = {
 	TERNARIO_EXP: 'INSTR_TERNARIO_EXP',
 	DECLARACION_VECTOR: 'INSTR_DECLARACION_VECTOR',
 	ACCESO_VECTOR: 'INSTR_ACCESO_VECTOR',
+	MODIFICAR_VECTOR: 'INSTR_MODIFICAR_VECTOR',
 }
 
 const TIPO_OPCION_SWITCH = {
@@ -323,6 +324,14 @@ const instrucciones = {
 		identificador:id,
 		expresion: expresion,
 		expresion2: expresion2,
+	}),
+	
+	nuevoModificarVector: (id, pos1, pos2, expresion) => ({
+		tipo: TIPO_INSTRUCCION.MODIFICAR_VECTOR,
+		identificador:id,
+		pos1: pos1,
+		pos2: pos2,
+		expresion: expresion
 	}),
 }
 
