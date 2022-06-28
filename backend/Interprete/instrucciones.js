@@ -62,6 +62,7 @@ const TIPO_INSTRUCCION = {
 	TERNARIO_INS: 'INSTR_TERNARIO_INS',
 	TERNARIO_EXP: 'INSTR_TERNARIO_EXP',
 	DECLARACION_VECTOR: 'INSTR_DECLARACION_VECTOR',
+	ACCESO_VECTOR: 'INSTR_ACCESO_VECTOR',
 }
 
 const TIPO_OPCION_SWITCH = {
@@ -313,6 +314,13 @@ const instrucciones = {
 		tipo_dato: tipo,
 		identificador:id,
 		tipo_dato2: tipo2,
+		expresion: expresion,
+		expresion2: expresion2,
+	}),
+
+	nuevoAccesoVector: (id, expresion, expresion2) => ({
+		tipo: TIPO_INSTRUCCION.ACCESO_VECTOR,
+		identificador:id,
 		expresion: expresion,
 		expresion2: expresion2,
 	}),

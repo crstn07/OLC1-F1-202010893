@@ -238,7 +238,7 @@ class TS {
             else {
                 listaErrores.push({
                     tipo: "SEMANTICO", linea: "", columna: "",
-                    mensaje: 'ERROR: la variable ' + id + ' no ha sido declarada'
+                    mensaje: '>>ERROR SEMANTICO: la variable ' + id + ' no ha sido declarada'
                 })
                 console.error('ERROR: la variable ' + id + ' no ha sido declarada')
                 //return undefined;
@@ -257,14 +257,34 @@ class TS {
             else {
                 listaErrores.push({
                     tipo: "SEMANTICO", linea: "", columna: "",
-                    mensaje: 'ERROR: la variable ' + id + ' no ha sido declarada'
+                    mensaje: '>>ERROR SEMANTICO: la variable ' + id + ' no ha sido declarada'
                 })
                 console.error('ERROR: la variable ' + id + ' no ha sido declarada')
             }
         }
     }
 
-
+    obtenerValorVector(id, expresion, expresion2) {
+        id = id.toLowerCase();
+        const simbolo = this._simbolos.filter(simbolo => simbolo.id === id)[0];
+        if (simbolo && expresion2) {
+        console.log("valor:" , simbolo.valor[0][1]);     
+            return  {valor: simbolo.valor[expresion.valor][expresion2.valor],tipo:simbolo.tipo}
+        } else if(simbolo){
+            return  {valor: simbolo.valor[expresion.valor],tipo:simbolo.tipo}
+        }
+        else {
+            if (this.anterior !== undefined) {
+                return this.anterior.obtenerValorVector(id, expresion, expresion2)
+            }
+            else {
+                listaErrores.push({
+                    tipo: "SEMANTICO", linea: "", columna: "",
+                    mensaje: '>>ERROR SEMANTICO: el vector "' + id + '" no ha sido declarado'
+                })
+            }
+        }
+    }
     /* obtenerMetodo(id) {
         id = id.toLowerCase();
         //const metodo = this._metodos.filter(metodo => metodo.id === id)[0];

@@ -308,7 +308,8 @@ expresion
 	| TOLOWER expresion 	{ $$ = instrucciones.nuevoToLower($2); }
 	| TOUPPER expresion 	{ $$ = instrucciones.nuevoToUpper($2); }
 	| ROUND expresion 		{ $$ = instrucciones.nuevoRound($2); }
-	| LENGTH expresion { $$ = instrucciones.nuevoLength($2); }
-	
+	| LENGTH expresion 		{ $$ = instrucciones.nuevoLength($2); }
+	| IDENTIFICADOR '[' expresion ']' 	{ $$ = instrucciones.nuevoAccesoVector($1,$3); }
+	| IDENTIFICADOR '[' expresion ']' '[' expresion ']' 	{ $$ = instrucciones.nuevoAccesoVector($1,$3,$6); }
 ;
 

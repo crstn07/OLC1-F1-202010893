@@ -336,9 +336,9 @@ function procesarExpresion(expresion, tablaDeSimbolos) {
 
     } else if (expresion.tipo === TIPO_VALOR.IDENTIFICADOR) {
         // SE RETORNA EL VALOR DE LA TABLA DE SIMBOLOS
-        let sym = tablaDeSimbolos.obtener(expresion.valor);
+        const sym = tablaDeSimbolos.obtener(expresion.valor);
         if (Array.isArray(sym.valor)) {
-            sym.valor = JSON.stringify(sym.valor)
+            return { valor: JSON.stringify(sym.valor), tipo: sym.tipo };
         }
         return { valor: sym.valor, tipo: sym.tipo };
     } else if (expresion.tipo === TIPO_OPERACION.MAYOR_QUE
@@ -465,6 +465,8 @@ function procesarExpresion(expresion, tablaDeSimbolos) {
             })
             return { valor: '>>ERROR SEMANTICO: solo se aceptan cadenas o vectores\n', tipo: "ERROR SEMANTICO" };
         }
+    } else if (expresion.tipo === TIPO_INSTRUCCION.ACCESO_VECTOR) {
+        return procesarAccesoVector(expresion, tablaDeSimbolos);
     } else {
         return { valor: 'ERROR: expresión no válida: ' + expresion + "\n", tipo: "ERROR SEMANTICO" };
     }
@@ -745,7 +747,7 @@ function procesarEjecutarMetodo(instruccion, tablaDeSimbolos) {
 
 function procesarDeclaracionVector(instruccion, tablaDeSimbolos) {
     let exp;
-    let exp2 = {valor:undefined};
+    let exp2 = { valor: undefined };
     if (instruccion.tipo_dato2) {
         exp = procesarExpresion(instruccion.expresion, tablaDeSimbolos);
         if (instruccion.expresion2) {
@@ -769,4 +771,12 @@ function procesarDeclaracionVector(instruccion, tablaDeSimbolos) {
     tablaDeSimbolos.agregarVector(instruccion.identificador, instruccion.tipo_dato, instruccion.tipo_dato2, exp, exp2)
 }
 
+function procesarAccesoVector(instruccion, tablaDeSimbolos) {
+    let exp = procesarExpresion(instruccion.expresion, tablaDeSimbolos);
+    let exp2;
+    if (instruccion.expresion2) {
+        exp2 = procesarExpresion(instruccion.expresion2, tablaDeSimbolos);
+    }
+    return tablaDeSimbolos.obtenerValorVector(instruccion.identificador, exp, exp2)
+}
 module.exports = analizar;
