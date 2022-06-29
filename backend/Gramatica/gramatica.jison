@@ -318,15 +318,15 @@ expresion
 	//| expresion MENOS MENOS		{ $$ = instrucciones.nuevoDecrementoPost($1);}
 	//| MENOS MENOS expresion		{ $$ = instrucciones.nuevoDecrementoPre($3);}
 	| IDENTIFICADOR PAR_ABRE parametros_asignar PAR_CIERRA { $$ = instrucciones.ejecutarMetodo($1,$3);}
-	| ternario expresion DOSPTS expresion 		   { $$ = instrucciones.nuevoTernarioExp($1,$2,$4); }
-	| TOLOWER expresion 	{ $$ = instrucciones.nuevoToLower($2); }
-	| TOUPPER expresion 	{ $$ = instrucciones.nuevoToUpper($2); }
-	| ROUND expresion 		{ $$ = instrucciones.nuevoRound($2); }
-	| LENGTH expresion 		{ $$ = instrucciones.nuevoLength($2); }
-	| IDENTIFICADOR '[' expresion ']' 	{ $$ = instrucciones.nuevoAccesoVector($1,$3); }
+	| ternario expresion DOSPTS expresion 	{ $$ = instrucciones.nuevoTernarioExp($1,$2,$4); }
+	| TOLOWER PAR_ABRE expresion PAR_CIERRA { $$ = instrucciones.nuevoToLower($3); }
+	| TOUPPER PAR_ABRE expresion PAR_CIERRA { $$ = instrucciones.nuevoToUpper($3); }
+	| ROUND PAR_ABRE expresion PAR_CIERRA 	{ $$ = instrucciones.nuevoRound($3); }
+	| LENGTH PAR_ABRE expresion	PAR_CIERRA 	{ $$ = instrucciones.nuevoLength($3); }
+	| IDENTIFICADOR '[' expresion ']' 		{ $$ = instrucciones.nuevoAccesoVector($1,$3); }
 	| IDENTIFICADOR '[' expresion ']' '[' expresion ']' 	{ $$ = instrucciones.nuevoAccesoVector($1,$3,$6); }
-	| TO_CHAR_ARRAY expresion { $$ = instrucciones.nuevoToCharArray($2); }
-	| IDENTIFICADOR PUNTO INDEXOF expresion  { $$ = instrucciones.nuevoIndexOf($1,$4); }
-	| IDENTIFICADOR PUNTO PUSH expresion { $$ = instrucciones.nuevoPush($1,$4); }
+	| TO_CHAR_ARRAY PAR_ABRE expresion PAR_CIERRA 			{ $$ = instrucciones.nuevoToCharArray($3); }
+	| IDENTIFICADOR PUNTO INDEXOF PAR_ABRE expresion PAR_CIERRA  { $$ = instrucciones.nuevoIndexOf($1,$5); }
+	| IDENTIFICADOR PUNTO PUSH PAR_ABRE expresion PAR_CIERRA { $$ = instrucciones.nuevoPush($1,$5); }
 ;
 
