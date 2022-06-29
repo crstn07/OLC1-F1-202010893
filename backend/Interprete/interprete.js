@@ -11,9 +11,11 @@ var listaErrores = require('../interprete/instrucciones').listaErrores;
 const TIPO_DATO = require('./tablaSimbolos').TIPO_DATO;
 const TS = require('./tablaSimbolos').TS;
 salida = "";
+tablas_simbolos = [];
 
 function analizar(entrada) {
     listaErrores.splice(0, listaErrores.length);
+    tablas_simbolos.splice(0, tablas_simbolos.length);
     let ast_instrucciones;
     salida = "";
     try {
@@ -26,7 +28,7 @@ function analizar(entrada) {
     }
 
     // Creación de una tabla de simbolos GLOBAL para iniciar con el interprete
-    const tsGlobal = new TS(undefined, []);
+    const tsGlobal = new TS("Global", undefined, []);
 
     // Procesa las instrucciones reconocidas en el AST
     procesarBloque(ast_instrucciones, tsGlobal)
@@ -36,7 +38,8 @@ function analizar(entrada) {
     listaErrores.forEach(_error => {
         salida += _error.mensaje + "\n";
     });
-    return { salida, ast: ast_instrucciones, listaErrores, TS: tsGlobal };
+    console.log("\n====================== TS =========================\n",JSON.stringify(tablas_simbolos));
+    return { salida, ast: ast_instrucciones, listaErrores, TS:tablas_simbolos /*tsGlobal*/ };
 }
 
 
@@ -127,7 +130,7 @@ function procesarBloque(instrucciones, tablaDeSimbolos) {
                 }
                 return { breakvar, continuevar, returnvar };
             } else if (instruccion.tipo === TIPO_INSTRUCCION.NUEVO_BLOQUE) {
-                const nuevaTS = new TS(tablaDeSimbolos, tablaDeSimbolos.metodos);
+                const nuevaTS = new TS("Bloque", tablaDeSimbolos, tablaDeSimbolos.metodos);
                 procesarBloque(instruccion.instrucciones, nuevaTS);
             } else if (instruccion.tipo === TIPO_INSTRUCCION.TERNARIO_INS) {
                 procesarTernarioIns(instruccion, tablaDeSimbolos);
@@ -144,6 +147,8 @@ function procesarBloque(instrucciones, tablaDeSimbolos) {
                 const pos = procesarExpresion(instruccion.pos, tablaDeSimbolos)
                 const valor = procesarExpresion(instruccion.valor, tablaDeSimbolos)
                 tablaDeSimbolos.Splice(instruccion.identificador, pos, valor);
+            } else if (instruccion.tipo === TIPO_INSTRUCCION.GRAFICAR_TS) {
+                tablas_simbolos.push(tablaDeSimbolos);
             } else {
                 listaErrores.push({
                     tipo: "SEMANTICO", linea: "", columna: "",
@@ -561,23 +566,20 @@ function procesarDecrementoPre(instruccion, tablaDeSimbolos) {
 
 function procesarWhile(instruccion, tablaDeSimbolos) {
     while (procesarExpresion(instruccion.expresion, tablaDeSimbolos).valor) {
-        let copiaArray = tablaDeSimbolos.simbolos.slice();
-        const tsWhile = new TS(tablaDeSimbolos, tablaDeSimbolos.metodos);
+        const tsWhile = new TS("While", tablaDeSimbolos, tablaDeSimbolos.metodos);
         if (procesarBloque(instruccion.instrucciones, tsWhile).breakvar) break;
     }
 }
 
 function procesarDoWhile(instruccion, tablaDeSimbolos) {
     do {
-        let copiaArray = tablaDeSimbolos.simbolos.slice();
-        const tsDoWhile = new TS(tablaDeSimbolos, tablaDeSimbolos.metodos);
+        const tsDoWhile = new TS("Do While", tablaDeSimbolos, tablaDeSimbolos.metodos);
         if (procesarBloque(instruccion.instrucciones, tsDoWhile).breakvar) break;
     } while (procesarExpresion(instruccion.expresion, tablaDeSimbolos).valor);
 }
 
 function procesarFor(instruccion, tablaDeSimbolos) {
-    let copiaArray = tablaDeSimbolos.simbolos.slice();
-    const tsFor = new TS(tablaDeSimbolos, tablaDeSimbolos.metodos);
+    const tsFor = new TS("For", tablaDeSimbolos, tablaDeSimbolos.metodos);
     if (instruccion.variable.tipo === TIPO_INSTRUCCION.ASIGNACION) {
         //LA VARIABLE YA HA SIDO DECLARADA EN EL AMBITO PADRE Y SE ASIGNA VALOR
         procesarAsignacion(instruccion.variable, tsFor /*Verificar por tsFor*/);
@@ -587,7 +589,7 @@ function procesarFor(instruccion, tablaDeSimbolos) {
     }
     while (procesarExpresion(instruccion.expresion, tsFor).valor) {
         //let copiaArray = tsLocal.simbolos.slice();
-        const tsForBloque = new TS(tsFor, tablaDeSimbolos.metodos);
+        const tsForBloque = new TS("Bloque For", tsFor, tablaDeSimbolos.metodos);
         var res = procesarBloque(instruccion.instrucciones, tsForBloque);
         if (res.breakvar) break;
         //if(res.continuevar) console.log("Continue");
@@ -601,8 +603,7 @@ function procesarFor(instruccion, tablaDeSimbolos) {
 function procesarIf(instruccion, tablaDeSimbolos) {
     const condicion = procesarExpresion(instruccion.expresion, tablaDeSimbolos);
     if (condicion.valor) {
-        let copiaArray = tablaDeSimbolos.simbolos.slice();
-        const /*Eliminar el Const si no funciona*/tsIf = new TS(tablaDeSimbolos, tablaDeSimbolos.metodos);
+        const tsIf = new TS("If", tablaDeSimbolos, tablaDeSimbolos.metodos);
         return procesarBloque(instruccion.instrucciones, tsIf);
     }
 }
@@ -610,12 +611,10 @@ function procesarIf(instruccion, tablaDeSimbolos) {
 function procesarIfElse(instruccion, tablaDeSimbolos) {
     const condicion = procesarExpresion(instruccion.expresion, tablaDeSimbolos);
     if (condicion.valor) {
-        let copiaArray = tablaDeSimbolos.simbolos.slice();
-        const tsIf = new TS(tablaDeSimbolos, tablaDeSimbolos.metodos);
+        const tsIf = new TS("If", tablaDeSimbolos, tablaDeSimbolos.metodos);
         return procesarBloque(instruccion.instruccionesIfVerdadero, tsIf);
     } else {
-        let copiaArray = tablaDeSimbolos.simbolos.slice();
-        const tsElse = new TS(tablaDeSimbolos, tablaDeSimbolos.metodos);;
+        const tsElse = new TS("Else", tablaDeSimbolos, tablaDeSimbolos.metodos);;
         return procesarBloque(instruccion.instruccionesIfFalso, tsElse);
     }
 }
@@ -623,8 +622,7 @@ function procesarIfElse(instruccion, tablaDeSimbolos) {
 function procesarElseIf(instruccion, tablaDeSimbolos) {
     const condicion = procesarExpresion(instruccion.expresion, tablaDeSimbolos);
     if (condicion.valor) {
-        let copiaArray = tablaDeSimbolos.simbolos.slice();
-        const tsIf = new TS(tablaDeSimbolos, tablaDeSimbolos.metodos);
+        const tsIf = new TS("If", tablaDeSimbolos, tablaDeSimbolos.metodos);
         return procesarBloque(instruccion.instruccionesIf, tsIf);
     } else {
         if (instruccion.if.tipo === TIPO_INSTRUCCION.IF_ELSE) return procesarIfElse(instruccion.if, tablaDeSimbolos);
@@ -637,8 +635,7 @@ function procesarSwitch(instruccion, tablaDeSimbolos) {
     let match = false;
     let def; let sinbreak = false;
     const valorExpresion = procesarExpresion(instruccion.expresion, tablaDeSimbolos);
-    let copiaArray = tablaDeSimbolos.simbolos.slice();
-    const tsSwitch = new TS(tablaDeSimbolos, tablaDeSimbolos.metodos);
+    const tsSwitch = new TS("Switch", tablaDeSimbolos, tablaDeSimbolos.metodos);
     instruccion.casos.forEach(caso => {
         if (caso.tipo == TIPO_OPCION_SWITCH.CASE) {
             const valorExpCase = procesarExpresion(caso.expresion, tsSwitch);
@@ -661,23 +658,21 @@ function procesarSwitch(instruccion, tablaDeSimbolos) {
 
 function procesarTernarioIns(instruccion, tablaDeSimbolos) {
     const condicion = procesarExpresion(instruccion.expresion, tablaDeSimbolos);
-    if (condicion.valor) {
-        const tsIf = new TS(tablaDeSimbolos, tablaDeSimbolos.metodos);
-        procesarBloque(instruccion.instruccionVerdadera, tsIf);
+    const tsTernario = new TS("Ternario", tablaDeSimbolos, tablaDeSimbolos.metodos);
+    if (condicion.valor) {    
+        procesarBloque(instruccion.instruccionVerdadera, tsTernario);
     } else {
-        const tsIf = new TS(tablaDeSimbolos, tablaDeSimbolos.metodos);
-        procesarBloque(instruccion.instruccionFalsa, tsIf);
+        procesarBloque(instruccion.instruccionFalsa, tsTernario);
     }
 }
 
 function procesarTernarioExp(instruccion, tablaDeSimbolos) {
     const condicion = procesarExpresion(instruccion.expresion, tablaDeSimbolos);
+    const tsTernario = new TS("Ternario", tablaDeSimbolos, tablaDeSimbolos.metodos);
     if (condicion.valor) {
-        const tsIf = new TS(tablaDeSimbolos, tablaDeSimbolos.metodos);
-        return procesarExpresion(instruccion.expresionVerdadera, tsIf);
+        return procesarExpresion(instruccion.expresionVerdadera, tsTernario);
     } else {
-        const tsIf = new TS(tablaDeSimbolos, tablaDeSimbolos.metodos);
-        return procesarExpresion(instruccion.expresionFalsa, tsIf);
+        return procesarExpresion(instruccion.expresionFalsa, tsTernario);
     }
 }
 
@@ -694,8 +689,7 @@ function procesarEjecutarMetodo(instruccion, tablaDeSimbolos) {
             let error = false;
             //let errorLength = false;
             //let errorType = false;
-            let copiaArray = tablaDeSimbolos.simbolos.slice();
-            const tsMetodo = new TS(tablaDeSimbolos, tablaDeSimbolos.metodos);
+            const tsMetodo = new TS(`Método ${metodos[0].id}`, tablaDeSimbolos, tablaDeSimbolos.metodos);
             for (const metodo of metodos) {
                 let params1 = metodo.parametros.map(parametro => parametro.tipo);
                 let params2 = instruccion.parametrosAsignar.map(parametro => procesarExpresion(parametro, tablaDeSimbolos).tipo);

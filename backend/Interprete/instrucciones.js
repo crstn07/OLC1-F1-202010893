@@ -69,6 +69,7 @@ const TIPO_INSTRUCCION = {
 	PUSH: 'INSTR_PUSH',
 	POP: 'INSTR_POP',
 	SPLICE: 'INSTR_SPLICE',
+	GRAFICAR_TS: 'INSTR_GRAFICAR_TS',
 }
 
 const TIPO_OPCION_SWITCH = {
@@ -366,6 +367,10 @@ const instrucciones = {
 		identificador:id,
 		pos: pos,
 		valor: valor
+	}),
+
+	nuevoGraficarTs: () => ({
+		tipo: TIPO_INSTRUCCION.GRAFICAR_TS,
 	}),
 }
 

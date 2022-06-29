@@ -62,10 +62,11 @@ function crearMetodo(id, parametros, instrucciones, tipoReturn) {
 
 class TS {
 
-    constructor(anterior, metodos) {
+    constructor(name, anterior, metodos) {
         this.anterior = anterior;
-        this._simbolos = new Array();
+        this._simbolos = [];
         this._metodos = metodos;
+        this.nombre = name;
     }
 
     agregarMetodo(id, parametros, instrucciones, tipoReturn) {
@@ -157,7 +158,7 @@ class TS {
                         }
 
                     }
-                    this._simbolos.push({ id: id, tipo: tipo, valor: vector, tipoVar: "VAR" });
+                    this._simbolos.push({ id: id, tipo: tipo, valor: vector, tipoVar: "VECTOR" });
                 } else {
                     listaErrores.push({
                         tipo: "SEMANTICO", linea: "", columna: "",
@@ -199,7 +200,7 @@ class TS {
                     }
 
                 }
-                if (!error) this._simbolos.push({ id: id, tipo: tipo, valor: vector, tipoVar: "VAR" });
+                if (!error) this._simbolos.push({ id: id, tipo: tipo, valor: vector, tipoVar: "VECTOR" });
             }
         } else {
             listaErrores.push({

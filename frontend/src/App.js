@@ -164,65 +164,71 @@ function TS() {
       })
       .then(response => {
         console.log(response.respuesta);
-        let simbolos = []
-        simbolos = response.respuesta._simbolos
-        let metodos = []
-        metodos = response.respuesta._metodos
-        var datos = `
-        <!DOCTYPE html>
-        <html lang="es">
-        <head>
-            <meta charset="UTF-8">
-            <meta http-equiv="X-UA-Compatible" content="IE=edge">
-            <title> TABLA DE SIMBOLOS </title>
-            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet"
-                integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
-        </head>
-        <body >        
-            <div style="position: absolute; width: 98%; left: 1%; top: 20px;">
-            <h1 style="margin-bottom: 20px;"> <center> TABLA DE SIMBOLOS </center></h1>
-                <table class="table table-ligth table-striped table-hover table-bordered border-dark">
-                    <thead class="table table-dark">
-                        <tr>
-                            <th scope="col">ID</th>
-                            <th scope="col">TIPO</th>
-                            <th scope="col">TIPO DATO</th>
-                            <th scope="col">VALOR</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-`
-        simbolos.forEach(simbolo => {
-          datos += ` <tr>
-  <td scope="col"> ${simbolo.id} </td>
-  <td scope="col"> ${simbolo.tipoVar}</td>
-  <td scope="col"> ${simbolo.tipo}</td>
-  <td scope="col"> ${simbolo.valor}</td>
-</tr>`
-        });
-        metodos.forEach(metodo => {
-          let tipo = ""
-          if (metodo.tipoReturn === "VOID") {
-            tipo = "MÉTODO"
-          } else {
-            tipo = "FUNCIÓN"
-          }
-          datos += ` <tr>
-  <td scope="col"> ${metodo.id} </td>
-  <td scope="col"> ${tipo} </td>
-  <td scope="col"> ${metodo.tipoReturn}</td>
-  <td scope="col"> </td>
-</tr>`
-        });
-        datos += `                    </tbody>
-</table>
-</div>
-</body>
-</html>`
+        let tablas = response.respuesta;
+        for (const tabla of tablas) {
+          let simbolos = []
+          simbolos = tabla._simbolos
+          let metodos = []
+          metodos = tabla._metodos
+          var datos = `
+          <!DOCTYPE html>
+          <html lang="es">
+          <head>
+              <meta charset="UTF-8">
+              <meta http-equiv="X-UA-Compatible" content="IE=edge">
+              <title> Tabla de Simbolos -  ${tabla.nombre} </title>
+              <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet"
+                  integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
+          </head>
+          <body >        
+              <div style="position: absolute; width: 98%; left: 1%; top: 20px;">
+              <h1 style="margin-bottom: 20px;"> <center> TABLA DE SIMBOLOS </center></h1>
+                  <table class="table table-ligth table-striped table-hover table-bordered border-dark">
+                      <thead class="table table-dark">
+                          <tr>
+                              <th scope="col">ENTORNO</th>
+                              <th scope="col">ID</th>
+                              <th scope="col">TIPO</th>
+                              <th scope="col">TIPO DATO</th>
+                              <th scope="col">VALOR</th>
+                          </tr>
+                      </thead>
+                      <tbody>
+  `
+          simbolos.forEach(simbolo => {
+            datos += ` <tr>
+    <td scope="col"> ${tabla.nombre} </td>
+    <td scope="col"> ${simbolo.id} </td>
+    <td scope="col"> ${simbolo.tipoVar}</td>
+    <td scope="col"> ${simbolo.tipo}</td>
+    <td scope="col"> ${JSON.stringify(simbolo.valor)}</td>
+  </tr>`
+          });
+          metodos.forEach(metodo => {
+            let tipo = ""
+            if (metodo.tipoReturn === "VOID") {
+              tipo = "MÉTODO"
+            } else {
+              tipo = "FUNCIÓN"
+            }
+            datos += ` <tr>
+    <td scope="col"> ${tabla.nombre} </td>
+    <td scope="col"> ${metodo.id} </td>
+    <td scope="col"> ${tipo} </td>
+    <td scope="col"> ${metodo.tipoReturn}</td>
+    <td scope="col"> </td>
+  </tr>`
+          });
+          datos += `                    </tbody>
+  </table>
+  </div>
+  </body>
+  </html>`
 
-        var win = window.open('', '', 'height=700,width=750');
-        win.document.write(datos);
-        win.document.close();
+          var win = window.open('', '', 'height=700,width=850');
+          win.document.write(datos);
+          win.document.close();
+        }        
       })
 
   }

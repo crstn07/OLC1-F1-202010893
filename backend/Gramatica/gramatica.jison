@@ -52,6 +52,7 @@
 "push"				return 'PUSH';
 "pop"				return 'POP';
 "splice"			return 'SPLICE';
+"graficar_ts();"	return 'GRAFICAR_TS';
 
 "."					return 'PUNTO';
 ":"					return 'DOSPTS';
@@ -163,6 +164,7 @@ instruccion
 	| CALL IDENTIFICADOR PAR_ABRE parametros_asignar PAR_CIERRA PTCOMA { $$ = instrucciones.ejecutarMetodo($2,$4);}
 	| statement 		{ $$ = instrucciones.nuevoBloque($1); }
 	| ternario instruccion_ternario DOSPTS instruccion_ternario PTCOMA { $$ = instrucciones.nuevoTernarioIns($1,[$2],[$4]); }
+	| GRAFICAR_TS { $$ = instrucciones.nuevoGraficarTs(); }
  	| error {  console.error('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this._$.first_line + ', en la columna: ' + this._$.first_column); 
 			listaErrores.push({
 				tipo: "SINTACTICO",
