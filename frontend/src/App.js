@@ -149,7 +149,7 @@ function App() {
 
   }
 
-function TS() {
+  function TS() {
     fetch(`http://localhost:${PORT}/TS`, {
       method: 'GET',
       headers: {
@@ -170,6 +170,8 @@ function TS() {
           simbolos = tabla._simbolos
           let metodos = []
           metodos = tabla._metodos
+          let anterior = tabla.anterior
+          let nombre = tabla.nombre
           var datos = `
           <!DOCTYPE html>
           <html lang="es">
@@ -197,38 +199,80 @@ function TS() {
   `
           simbolos.forEach(simbolo => {
             datos += ` <tr>
-    <td scope="col"> ${tabla.nombre} </td>
-    <td scope="col"> ${simbolo.id} </td>
-    <td scope="col"> ${simbolo.tipoVar}</td>
-    <td scope="col"> ${simbolo.tipo}</td>
-    <td scope="col"> ${JSON.stringify(simbolo.valor)}</td>
-  </tr>`
+            <td scope="col"> ${nombre} </td>
+            <td scope="col"> ${simbolo.id} </td>
+            <td scope="col"> ${simbolo.tipoVar}</td>
+            <td scope="col"> ${simbolo.tipo}</td>
+            <td scope="col"> ${JSON.stringify(simbolo.valor)}</td>
+            </tr>`
           });
-          metodos.forEach(metodo => {
-            let tipo = ""
-            if (metodo.tipoReturn === "VOID") {
-              tipo = "MÉTODO"
-            } else {
-              tipo = "FUNCIÓN"
+          if (nombre === "Global") {
+              metodos.forEach(metodo => {
+              let tipo = ""
+              if (metodo.tipoReturn === "VOID") {
+                tipo = "MÉTODO"
+              } else {
+                tipo = "FUNCIÓN"
+              }
+              datos += ` <tr>
+                <td scope="col"> ${nombre} </td>
+                <td scope="col"> ${metodo.id} </td>
+                <td scope="col"> ${tipo} </td>
+                <td scope="col"> ${metodo.tipoReturn}</td>
+                <td scope="col"> </td>
+                </tr>`
+            });
+          }
+
+
+          while (anterior !== undefined) {
+            try {
+              nombre = anterior.nombre;
+              simbolos = anterior._simbolos
+              metodos = anterior._metodos
+            } catch (error) {
+              console.log(error)
             }
-            datos += ` <tr>
-    <td scope="col"> ${tabla.nombre} </td>
-    <td scope="col"> ${metodo.id} </td>
-    <td scope="col"> ${tipo} </td>
-    <td scope="col"> ${metodo.tipoReturn}</td>
-    <td scope="col"> </td>
-  </tr>`
-          });
+            simbolos.forEach(simbolo => {
+              datos += ` <tr>
+                <td scope="col"> ${nombre} </td>
+                <td scope="col"> ${simbolo.id} </td>
+                <td scope="col"> ${simbolo.tipoVar}</td>
+                <td scope="col"> ${simbolo.tipo}</td>
+                <td scope="col"> ${JSON.stringify(simbolo.valor)}</td>
+              </tr>`
+            });
+            if (nombre === "Global") {
+              metodos.forEach(metodo => {
+                let tipo = ""
+                if (metodo.tipoReturn === "VOID") {
+                  tipo = "MÉTODO"
+                } else {
+                  tipo = "FUNCIÓN"
+                }
+                datos += ` <tr>
+                  <td scope="col"> ${nombre} </td>
+                  <td scope="col"> ${metodo.id} </td>
+                  <td scope="col"> ${tipo} </td>
+                  <td scope="col"> ${metodo.tipoReturn}</td>
+                  <td scope="col"> </td>
+                </tr>`
+              });
+            }
+
+
+            anterior = anterior.anterior;
+          }
           datos += `                    </tbody>
-  </table>
-  </div>
-  </body>
-  </html>`
+                  </table>
+                  </div>
+                  </body>
+                  </html>`
 
           var win = window.open('', '', 'height=700,width=850');
           win.document.write(datos);
           win.document.close();
-        }        
+        }
       })
 
   }

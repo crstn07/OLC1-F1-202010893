@@ -16,6 +16,7 @@ tablas_simbolos = [];
 function analizar(entrada) {
     listaErrores.splice(0, listaErrores.length);
     tablas_simbolos.splice(0, tablas_simbolos.length);
+    contBloque = 0
     let ast_instrucciones;
     salida = "";
     try {
@@ -38,8 +39,7 @@ function analizar(entrada) {
     listaErrores.forEach(_error => {
         salida += _error.mensaje + "\n";
     });
-    console.log("\n====================== TS =========================\n",JSON.stringify(tablas_simbolos));
-    return { salida, ast: ast_instrucciones, listaErrores, TS:tablas_simbolos /*tsGlobal*/ };
+    return { salida, ast: ast_instrucciones, listaErrores, TS: tablas_simbolos /*tsGlobal*/ };
 }
 
 
@@ -130,7 +130,8 @@ function procesarBloque(instrucciones, tablaDeSimbolos) {
                 }
                 return { breakvar, continuevar, returnvar };
             } else if (instruccion.tipo === TIPO_INSTRUCCION.NUEVO_BLOQUE) {
-                const nuevaTS = new TS("Bloque", tablaDeSimbolos, tablaDeSimbolos.metodos);
+                contBloque++;
+                const nuevaTS = new TS("Bloque " + contBloque, tablaDeSimbolos, tablaDeSimbolos.metodos);
                 procesarBloque(instruccion.instrucciones, nuevaTS);
             } else if (instruccion.tipo === TIPO_INSTRUCCION.TERNARIO_INS) {
                 procesarTernarioIns(instruccion, tablaDeSimbolos);
@@ -148,7 +149,7 @@ function procesarBloque(instrucciones, tablaDeSimbolos) {
                 const valor = procesarExpresion(instruccion.valor, tablaDeSimbolos)
                 tablaDeSimbolos.Splice(instruccion.identificador, pos, valor);
             } else if (instruccion.tipo === TIPO_INSTRUCCION.GRAFICAR_TS) {
-                tablas_simbolos.push(tablaDeSimbolos);
+                tablas_simbolos.push(JSON.parse(JSON.stringify(tablaDeSimbolos)));
             } else {
                 listaErrores.push({
                     tipo: "SEMANTICO", linea: "", columna: "",
@@ -659,7 +660,7 @@ function procesarSwitch(instruccion, tablaDeSimbolos) {
 function procesarTernarioIns(instruccion, tablaDeSimbolos) {
     const condicion = procesarExpresion(instruccion.expresion, tablaDeSimbolos);
     const tsTernario = new TS("Ternario", tablaDeSimbolos, tablaDeSimbolos.metodos);
-    if (condicion.valor) {    
+    if (condicion.valor) {
         procesarBloque(instruccion.instruccionVerdadera, tsTernario);
     } else {
         procesarBloque(instruccion.instruccionFalsa, tsTernario);
