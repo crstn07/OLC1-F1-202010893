@@ -1,6 +1,7 @@
 const fs = require('fs');
 const { graphviz } = require('node-graphviz');
 const analizar = require('./interprete/interprete');
+const { exec } = require("child_process");
 
 const express = require('express')
 const cors = require('cors');
@@ -29,6 +30,9 @@ app.post('/analizar', (req, res) => {
 })
 
 app.get('/AST', (req, res) => {
+    exec("AST.svg", () => {
+
+    });
     return res.send(JSON.stringify({ "Salida": "OK" }))
 })
 
@@ -71,25 +75,27 @@ function obtenerHijos(nodoPadre, cont, expresion) {
     let nodos = ""
     let conexiones = ""
     if (expresion !== undefined) {
-        res = obtenerValor(expresion.valor, nodoPadre, cont);
+        let res = obtenerValor(expresion, nodoPadre, cont);
         nodos += res.nodos;
         conexiones += res.conexiones;
         return {nodos, conexiones}
     }
 
 }
-function obtenerValor(valor, nodoPadre, cont) {
+function obtenerValor(expresion, nodoPadre, cont) {
     let nodos = "";
     let conexiones = "";
-    if (valor !== undefined) {
-        nodos += "N" + cont + "[fillcolor=green  style=filled label=\"" + valor + "\"];\n";
+    if (expresion.valor !== undefined) {
+        nodos += "N" + cont + "[fillcolor=green  style=filled label=\"" + expresion + "\"];\n";
         conexiones += "N" + nodoPadre + " -> " + "N" + cont + ";\n";
         return { nodos, conexiones }//return expresion.valor;
     } else {
-        res += obtenerValorIzq(valor.valor, nodoPadre, cont);
-        res += obtenerValorDer(valor.valor, nodoPadre, cont);
-        nodos += res.nodos;
-        conexiones += res.conexiones;
+        let res1 ="";
+        let res2 ="";
+        res1 += obtenerValorIzq(expresion, nodoPadre, cont);
+        res1 += obtenerValorDer(expresion, nodoPadre, cont);
+        nodos += res1.nodos + res2.nodos;
+        conexiones += res1.conexiones + res2.conexiones;
         return { nodos, conexiones }
         /*         if (expresion.operandoIzq !== undefined && expresion.operandoIzq.valor !== undefined) {
                     return expresion.operandoIzq.valor;
@@ -105,26 +111,22 @@ function obtenerValor(valor, nodoPadre, cont) {
 }
 
 function obtenerValorDer(expresion, nodoPadre, cont) {
-    let nodos = "";
-    let conexiones = "";
-    if (expresion.operandoDer !== undefined && expresion.operandoDer.valor !== undefined) {
-        nodos += "N" + cont + "[fillcolor=green  style=filled label=\"" + expresion.valor + "\"];\n";
-        conexiones += "N" + nodoPadre + " -> " + "N" + cont + ";\n";
+    if (expresion.operandoDer !== undefined) {
+        let nodos = "N" + cont + "[fillcolor=green  style=filled label=\"" + expresion.operandoDer.valor + "\"];\n";
+        let conexiones = "N" + nodoPadre + " -> " + "N" + cont + ";\n";
         return { nodos, conexiones }
-    } else if (expresion.operandoDer.valor === undefined) {
-        return obtenerValor(expresion.operandoDer);
-    }
+    } /* else if (expresion.operandoDer.valor === undefined) {
+        return obtenerValorDer(expresion.operandoDer);
+    } */
 
 }
 function obtenerValorIzq(expresion, nodoPadre, cont) {
-    let nodos = "";
-    let conexiones = "";
-    if (expresion.operandoIzq !== undefined && expresion.operandoIzq.valor !== undefined) {
-        nodos += "N" + cont + "[fillcolor=green  style=filled label=\"" + expresion.valor + "\"];\n";
-        conexiones += "N" + nodoPadre + " -> " + "N" + cont + ";\n";
+    if (expresion.operandoIzq !== undefined) {
+        let nodos = "N" + cont + "[fillcolor=green  style=filled label=\"" + expresion.operandoIzq.valor + "\"];\n";
+        let conexiones = "N" + nodoPadre + " -> " + "N" + cont + ";\n";
         return { nodos, conexiones }
-    } else if (expresion.operandoIzq.valor === undefined) {
-        return obtenerValor(expresion.operandoIzq);
-    }
+    }/*  else if (expresion.operandoIzq.valor === undefined) {
+        return obtenerValorIzq(expresion.operandoIzq);
+    } */
 }
 app.listen(PORT, () => console.log('Server running on port: ' + PORT))

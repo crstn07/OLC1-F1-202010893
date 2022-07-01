@@ -82,7 +82,28 @@ function App() {
       })
       .then(response => {
         console.log(response);
-        document.querySelector('#AST').innerHTML = "<img src=\"AST.svg\">";
+        //document.querySelector('#AST').innerHTML = '<img src={require("../AST.svg").default} />';
+/*         var datos = `
+        <!DOCTYPE html>
+        <html lang="es">
+        <head>
+            <meta charset="UTF-8">
+            <meta http-equiv="X-UA-Compatible" content="IE=edge">
+            <title> REPORTE ERRORES </title>
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet"
+                integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
+        </head>
+        <body >        
+            <div style="position: absolute; width: 98%; left: 1%; top: 20px;">
+            <h1 style="margin-bottom: 20px;"> <center> REPORTE DE AST </center></h1>
+            <img src="../AST.svg">
+            </div>
+        </body>
+        </html>`
+
+        var win = window.open('', '', 'height=700,width=750');
+        win.document.write(datos);
+        win.document.close(); */
       })
 
   }
@@ -335,7 +356,7 @@ function App() {
       <form id="formEditor">
         <label htmlFor="Entrada" className="form-label titulos">Editor</label>
         <Editor
-          height="73vh"
+          height="75vh"
           defaultLanguage="java"
           defaultValue="//Escribir algo"
           onMount={handleEditorDidMount}
@@ -346,10 +367,6 @@ function App() {
         <textarea className=" form-control" id="consola" wrap="off" readOnly> </textarea>
         <div style={{ marginBottom: '25px' }} ></div>
       </form>
-
-      <div id="AST">
-
-      </div>
     </>
 
   );

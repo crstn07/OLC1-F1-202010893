@@ -37,7 +37,6 @@ function crearSimbolo(id, tipo, valor, tipoVar) {
                 tipo: "SEMANTICO", linea: "", columna: "",
                 mensaje: ">>ERROR SEMANTICO: " + id + " es de tipo " + tipo + " y el valor a asignar \"" + valor.valor + "\" es de tipo " + valor.tipo
             })
-            console.log(">>ERROR SEMANTICO: " + id + " es de tipo " + tipo + " y el valor a asignar \"" + valor.valor + "\" es de tipo " + valor.tipo)
         } else {
             return {
                 id: id,
@@ -89,7 +88,6 @@ class TS {
                     tipo: "SEMANTICO", linea: "", columna: "",
                     mensaje: '>>ERROR SEMANTICO: el metodo "' + id.toLowerCase() + '" ya fue declarado'
                 })
-                console.error('>>ERROR SEMANTICO: el metodo "' + id.toLowerCase() + '" ya fue declarado')
             }
         }
         if (!metodos[0]) {
@@ -116,8 +114,6 @@ class TS {
                     tipo: "SEMANTICO", linea: "", columna: "",
                     mensaje: '>>ERROR SEMANTICO: la variable "' + ID.toLowerCase() + '" ya fue declarada'
                 })
-                console.error('>>ERROR SEMANTICO: la variable "' + ID.toLowerCase() + '" ya fue declarada')
-                //throw new error('>>ERROR SEMANTICO: la variable "' + ID.toLowerCase() + '" ya fue declarada');
             }
 
         })
@@ -166,7 +162,6 @@ class TS {
                     })
                 }
             } else {
-                console.log("valores: ", valor.valor)
                 let vector = [];
                 let error = false;
                 for (const val of valor.valor) {
@@ -222,14 +217,12 @@ class TS {
                         tipo: "SEMANTICO", linea: "", columna: "",
                         mensaje: '>>ERROR SEMANTICO: ' + id + ' es de tipo ' + simbolo.tipo + ' y el valor a asignar es de tipo ' + valor.tipo
                     })
-                    console.error('>>ERROR SEMANTICO: ' + id + ' es de tipo ' + simbolo.tipo + ' y el valor a asignar es de tipo ' + valor.tipo)
                 }
             } else {
                 listaErrores.push({
                     tipo: "SEMANTICO", linea: "", columna: "",
                     mensaje: '>>ERROR SEMANTICO: ' + id + ' es una constante, no se puede cambiar su valor'
                 })
-                console.error('>>ERROR SEMANTICO: ' + id + ' es una constante, no se puede cambiar su valor')
             }
         }
         else {
@@ -241,8 +234,6 @@ class TS {
                     tipo: "SEMANTICO", linea: "", columna: "",
                     mensaje: '>>ERROR SEMANTICO: la variable ' + id + ' no ha sido declarada'
                 })
-                console.error('ERROR: la variable ' + id + ' no ha sido declarada')
-                //return undefined;
             }
         }
     }
@@ -260,7 +251,6 @@ class TS {
                     tipo: "SEMANTICO", linea: "", columna: "",
                     mensaje: '>>ERROR SEMANTICO: la variable ' + id + ' no ha sido declarada'
                 })
-                console.error('ERROR: la variable ' + id + ' no ha sido declarada')
             }
         }
     }

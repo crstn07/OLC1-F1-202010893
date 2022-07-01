@@ -3,7 +3,7 @@
   position: relative;
   top: 20px;
   left: 2%;
-  width: 56%;
+  width: 53%;
 }
 
 .titulos {
@@ -17,11 +17,11 @@
   position: relative;
   top: 20px;
   left: 4%;
-  width: 38%;
+  width: 41%;
 }
 
 #consola {
-  height: 73vh;
+  height: 75vh;
   background-color: #1E1E1E;
   color:whitesmoke;
   font-family: Consolas; 
